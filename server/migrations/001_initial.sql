@@ -98,7 +98,8 @@ CREATE TABLE users (
   first_name VARCHAR(128) NOT NULL,
   last_name VARCHAR(128) NOT NULL,
   email VARCHAR(128) UNIQUE NOT NULL,
-  phone VARCHAR(16) UNIQUE NOT NULL
+  phone VARCHAR(16) UNIQUE NOT NULL,
+  password TEXT NOT NULL
 );
 
 CREATE TABLE orders (
