@@ -9,6 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/joho/godotenv"
 	"github.com/yura4ka/vydelka/db"
+	"github.com/yura4ka/vydelka/middleware"
 	"github.com/yura4ka/vydelka/router"
 	"github.com/yura4ka/vydelka/services"
 )
@@ -38,6 +39,7 @@ func main() {
 		AllowOrigins:     os.Getenv("CLIENT_ADDR"),
 		AllowCredentials: true,
 	}))
+	app.Use(middleware.ParseLanguage)
 
 	db.Connect()
 	router.SetupRouter(app)
