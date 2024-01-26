@@ -10,9 +10,13 @@ export const SignUp = () => {
     navigate("/");
     return null;
   }
+
   return (
     <main className="container flex items-center justify-center">
-      <RegisterForm />
+      <RegisterForm
+        onSuccess={() => navigate("/")}
+        onError={() => navigate("/auth/sign-in")}
+      />
     </main>
   );
 };

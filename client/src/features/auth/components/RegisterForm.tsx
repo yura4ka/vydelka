@@ -18,8 +18,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
+import { AuthState } from "../authSlice";
 
 const initialForm = () => ({
   firstName: "",
@@ -37,11 +38,18 @@ const initialFormErrors = () => ({
   password: true,
 });
 
-type Props = React.FormHTMLAttributes<HTMLFormElement>;
+type Props = {
+  onSuccess?: (user: Required<AuthState>) => void;
+  onError?: () => void;
+} & React.FormHTMLAttributes<HTMLFormElement>;
 
-export const RegisterForm = ({ className, ...rest }: Props) => {
+export const RegisterForm = ({
+  className,
+  onSuccess,
+  onError,
+  ...rest
+}: Props) => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const { toast } = useToast();
 
   const [register, registerStatus] = useRegisterMutation();
@@ -84,13 +92,13 @@ export const RegisterForm = ({ className, ...rest }: Props) => {
       return;
     }
     try {
-      await login({
+      const result = await login({
         emailOrPhone: form.email,
         password: form.password,
       }).unwrap();
-      navigate("/");
+      onSuccess?.(result);
     } catch {
-      navigate("/auth/sign-in");
+      onError?.();
     }
   };
 
@@ -174,7 +182,7 @@ export const RegisterForm = ({ className, ...rest }: Props) => {
               changeForm({ password: value });
               changeFormErrors({ password: !isValid });
             }}
-            placeholder="cool_password_2023"
+            placeholder="cool-password-2024"
             autoComplete="new-password"
           />
           <SubmitButton

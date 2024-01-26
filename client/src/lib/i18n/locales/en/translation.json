@@ -27,6 +27,7 @@
       "confirm": "Confirm Password",
       "description": "At least 4 characters",
       "not-match": "Passwords do not match"
-    }
+    },
+    "email-or-phone": "Email or Phone Number"
   }
 }
