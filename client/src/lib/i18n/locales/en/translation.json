@@ -1,3 +1,32 @@
 {
-  "test": "hello"
+  "categories": "Categories",
+  "search-placeholder": "Search...",
+  "error": {
+    "something-wrong": "Uh oh! Something went wrong.",
+    "try-again": "Please try again."
+  },
+  "auth": {
+    "sign-up": "Sign Up",
+    "sign-in": "Sign In",
+    "have-account": "Already have an account?",
+    "don't-have-account": "Don't have an account?",
+    "first-name": "First Name",
+    "last-name": "Last Name",
+    "email": {
+      "label": "Email",
+      "wrong-format": "Please enter a valid email address",
+      "already-taken": "This email is already taken"
+    },
+    "phone": {
+      "label": "Phone Number",
+      "wrong-format": "Please enter a valid number",
+      "already-taken": "This number is already taken"
+    },
+    "password": {
+      "label": "Password",
+      "confirm": "Confirm Password",
+      "description": "At least 4 characters",
+      "not-match": "Passwords do not match"
+    }
+  }
 }
