@@ -1,7 +1,8 @@
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
-import { Layout } from "./components/layout/Layout";
+import { Layout, AuthLayout } from "./components/layout";
 import { Home } from "./pages/home";
 import { SignIn, SignUp } from "./pages/auth";
+import { AdminCategories } from "./pages/admin";
 
 const router = createBrowserRouter([
   {
@@ -15,6 +16,11 @@ const router = createBrowserRouter([
           { path: "sign-in", element: <SignIn /> },
           { path: "sign-up", element: <SignUp /> },
         ],
+      },
+      {
+        path: "admin",
+        element: <AuthLayout requireAdmin />,
+        children: [{ path: "categories", element: <AdminCategories /> }],
       },
     ],
   },
