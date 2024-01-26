@@ -10,6 +10,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/yura4ka/vydelka/db"
 	"github.com/yura4ka/vydelka/router"
+	"github.com/yura4ka/vydelka/services"
 )
 
 func init() {
@@ -24,7 +25,14 @@ func init() {
 }
 
 func main() {
-	app := fiber.New()
+	app := fiber.New(fiber.Config{
+		ErrorHandler: func(c *fiber.Ctx, err error) error {
+			return c.Status(fiber.StatusBadRequest).JSON(services.GlobalErrorHandlerResp{
+				Success: false,
+				Message: err.Error(),
+			})
+		},
+	})
 	app.Use(logger.New())
 	app.Use(cors.New(cors.Config{
 		AllowOrigins:     os.Getenv("CLIENT_ADDR"),
