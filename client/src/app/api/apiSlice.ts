@@ -1,7 +1,8 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { RootState } from "../store";
-import { AuthState, setCredentials } from "@/features/auth/authSlice";
+import { AuthState } from "@/features/auth/authSlice";
 import i18next from "i18next";
+import { setCredentials } from "@/features/auth/actions";
 
 const baseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_API_URL,
@@ -32,4 +33,5 @@ const baseQueryWithAuth: typeof baseQuery = async (args, api, endpoints) => {
 export const api = createApi({
   baseQuery: baseQueryWithAuth,
   endpoints: () => ({}),
+  tagTypes: ["Category"],
 });

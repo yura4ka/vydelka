@@ -6,6 +6,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { useAppDispatch } from "@/app/hooks";
+import { api } from "@/app/api/apiSlice";
 
 const languages = [
   { value: "en", title: "🇺🇸 English" },
@@ -14,6 +16,13 @@ const languages = [
 
 export const LanguageToggle = () => {
   const { i18n } = useTranslation();
+  const dispatch = useAppDispatch();
+
+  const onChange = (lang: string) => {
+    i18n.changeLanguage(lang);
+    dispatch(api.util.resetApiState());
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -23,10 +32,7 @@ export const LanguageToggle = () => {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {languages.map((l) => (
-          <DropdownMenuItem
-            key={l.value}
-            onClick={() => i18n.changeLanguage(l.value)}
-          >
+          <DropdownMenuItem key={l.value} onClick={() => onChange(l.value)}>
             {l.title}
           </DropdownMenuItem>
         ))}
