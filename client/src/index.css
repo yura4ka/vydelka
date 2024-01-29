@@ -62,4 +62,17 @@
   .link {
     @apply font-semibold text-blue-600 transition-all hover:text-blue-700 hover:underline dark:text-blue-500 dark:hover:text-blue-600;
   }
+
+  html.dark .uploadcare-config {
+    --darkmode: 1;
+    --h-accent: 20.5;
+    --s-accent: 90.2%;
+    --l-accent: 48.2%;
+  }
+
+  .uploadcare-config {
+    --h-accent: 24.6;
+    --s-accent: 95%;
+    --l-accent: 53.1%;
+  }
 }
