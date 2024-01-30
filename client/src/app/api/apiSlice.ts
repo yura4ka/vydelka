@@ -33,5 +33,5 @@ const baseQueryWithAuth: typeof baseQuery = async (args, api, endpoints) => {
 export const api = createApi({
   baseQuery: baseQueryWithAuth,
   endpoints: () => ({}),
-  tagTypes: ["Category"],
+  tagTypes: ["CategoryInfo", "CategoryList"],
 });
