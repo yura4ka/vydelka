@@ -102,8 +102,8 @@ func Refresh(c *fiber.Ctx) error {
 		return c.SendStatus(400)
 	}
 
-	newAccess, _ := services.CreateAccessToken(services.TokenPayload{Id: payload.Id})
-	newRefresh, _ := services.CreateRefreshToken(services.TokenPayload{Id: payload.Id})
+	newAccess, _ := services.CreateAccessToken(services.TokenPayload{Id: payload.Id, IsAdmin: user.IsAdmin})
+	newRefresh, _ := services.CreateRefreshToken(services.TokenPayload{Id: payload.Id, IsAdmin: user.IsAdmin})
 	if newAccess == "" || newRefresh == "" {
 		return c.SendStatus(500)
 	}

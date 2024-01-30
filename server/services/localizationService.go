@@ -44,3 +44,19 @@ func CreateTranslations(tx *pgx.Tx, t Translations) (string, error) {
 
 	return translationItemId, err
 }
+
+func ChangeTranslation(tx *pgx.Tx, t Translations, translationId string) error {
+	_, err := (*tx).Exec(db.Ctx, `
+		UPDATE translations SET content = $1 WHERE item_id = $2 AND lang = $3;
+	`, t.En, translationId, Languages.En)
+	
+	if err != nil {
+		return err;
+	}
+
+	_, err = (*tx).Exec(db.Ctx, `
+		UPDATE translations SET content = $1 WHERE item_id = $2 AND lang = $3;
+	`, t.Ua, translationId, Languages.Ua)
+
+	return err
+}
