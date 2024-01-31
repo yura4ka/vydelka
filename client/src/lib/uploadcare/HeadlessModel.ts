@@ -22,7 +22,6 @@ export default class HeadlessModal extends LR.ShadowWrapper {
         <lr-copyright></lr-copyright>
       </lr-start-from>
       <lr-upload-list></lr-upload-list>
-      <lr-camera-source></lr-camera-source>
       <lr-url-source></lr-url-source>
       <lr-external-source></lr-external-source>
       <lr-cloud-image-editor-activity></lr-cloud-image-editor-activity>
