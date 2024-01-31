@@ -75,18 +75,13 @@ func Login(c *fiber.Ctx) error {
 		return c.SendStatus(500)
 	}
 
+	var ucareToken *services.UcareToken
+	if user.IsAdmin {
+		ucareToken = services.CreateUcareToken()
+	}
+
 	c.Cookie(services.CreateRefreshCookie(refresh))
-	return c.JSON(fiber.Map{
-		"token": access,
-		"user": fiber.Map{
-			"id":          user.Id,
-			"firstName":   user.FirstName,
-			"lastName":    user.LastName,
-			"email":       user.Email,
-			"phoneNumber": user.Phone,
-			"isAdmin":     user.IsAdmin,
-		},
-	})
+	return c.JSON(services.CreateLoginResponse(user, access, ucareToken))
 }
 
 func Refresh(c *fiber.Ctx) error {
@@ -108,18 +103,13 @@ func Refresh(c *fiber.Ctx) error {
 		return c.SendStatus(500)
 	}
 
+	var ucareToken *services.UcareToken
+	if user.IsAdmin {
+		ucareToken = services.CreateUcareToken()
+	}
+
 	c.Cookie(services.CreateRefreshCookie(newRefresh))
-	return c.JSON(fiber.Map{
-		"token": newAccess,
-		"user": fiber.Map{
-			"id":          user.Id,
-			"firstName":   user.FirstName,
-			"lastName":    user.LastName,
-			"email":       user.Email,
-			"phoneNumber": user.Phone,
-			"isAdmin":     user.IsAdmin,
-		},
-	})
+	return c.JSON(services.CreateLoginResponse(user, newAccess, ucareToken))
 }
 
 func CheckEmail(c *fiber.Ctx) error {

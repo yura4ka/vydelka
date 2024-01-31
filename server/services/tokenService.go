@@ -1,7 +1,11 @@
 package services
 
 import (
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -95,4 +99,18 @@ func VerifyAccessToken(token string) (*TokenPayload, error) {
 	}
 
 	return nil, err
+}
+
+type UcareToken struct {
+	Signature string `json:"signature"`
+	Expire    int64  `json:"expire"`
+}
+
+func CreateUcareToken() *UcareToken {
+	mac := hmac.New(sha256.New, []byte(os.Getenv("UPLOAD_CARE_SECRET")))
+	expire := time.Now().Add(access_max_age).Unix()
+	mac.Write([]byte(strconv.FormatInt(expire, 10)))
+	dataHmac := mac.Sum(nil)
+	hmacHex := hex.EncodeToString(dataHmac)
+	return &UcareToken{Signature: hmacHex, Expire: expire}
 }

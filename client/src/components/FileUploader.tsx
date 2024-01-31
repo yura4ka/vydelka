@@ -7,6 +7,7 @@ import { Slot } from "@radix-ui/react-slot";
 import { cn } from "@/lib/utils";
 import { FileImageIcon } from "lucide-react";
 import { Button } from "./ui/button";
+import { useAuth } from "@/features/auth/useAuth";
 
 type RefType = typeof LR.UploadCtxProvider.prototype & LR.UploadCtxProvider;
 
@@ -38,6 +39,7 @@ export const FileUploader: React.FC<Props> = ({
   className,
   ...rest
 }) => {
+  const { ucareToken } = useAuth();
   const id = useId();
   ctxName ??= id;
 
@@ -72,8 +74,8 @@ export const FileUploader: React.FC<Props> = ({
           {...rest}
           ctx-name={ctxName}
           pubkey={import.meta.env.VITE_UPLOAD_CARE_PUBLIC_TOKEN}
-          // secureSignature={ucareToken}
-          // secureExpire={expire?.toString()}
+          secureSignature={ucareToken?.signature}
+          secureExpire={ucareToken?.expire.toString()}
           maxLocalFileSizeBytes={5000000}
           imgOnly={true}
           sourceList="local, url"

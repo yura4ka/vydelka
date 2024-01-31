@@ -31,3 +31,31 @@ func IsUniqueViolation(err error) *fiber.Error {
 		Message: pgErr.Detail,
 	}
 }
+
+type LoginResponseUser struct {
+	Id          string `json:"id"`
+	FirstName   string `json:"firstName"`
+	LastName    string `json:"lastName"`
+	Email       string `json:"email"`
+	PhoneNumber string `json:"phoneNumber"`
+	IsAdmin     *bool  `json:"isAdmin,omitempty"`
+}
+
+type LoginResponse struct {
+	Token      string            `json:"token"`
+	User       LoginResponseUser `json:"user"`
+	UcareToken *UcareToken       `json:"ucareToken,omitempty"`
+}
+
+func CreateLoginResponse(user *User, token string, ucareToken *UcareToken) LoginResponse {
+	var isAdmin *bool
+	if user.IsAdmin {
+		isAdmin = &user.IsAdmin
+	}
+
+	return LoginResponse{
+		token,
+		LoginResponseUser{user.Id, user.FirstName, user.LastName, user.Email, user.Phone, isAdmin},
+		ucareToken,
+	}
+}

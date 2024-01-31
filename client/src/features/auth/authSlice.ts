@@ -15,6 +15,10 @@ export interface User {
 export interface AuthState {
   user?: User | null;
   token?: string;
+  ucareToken?: {
+    signature: string;
+    expire: number;
+  };
 }
 
 const initialState: AuthState = {};
