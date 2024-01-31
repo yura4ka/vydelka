@@ -29,7 +29,7 @@ export type ChangeCategory = {
 export const categoryApi = api.injectEndpoints({
   endpoints: (builder) => ({
     getCategories: builder.query<Category[], string | void>({
-      query: (id) => ({ url: id ? `category?parent_id=${id}` : `category` }),
+      query: (id) => ({ url: id ? `category?parentId=${id}` : `category` }),
       providesTags: (result, _, id) =>
         result
           ? [

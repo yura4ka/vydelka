@@ -155,3 +155,164 @@ func ChangeCategory(category *TChangeCategory) error {
 
 	return tx.Commit(db.Ctx)
 }
+
+type FilterVariant struct {
+	Id           string        `json:"id"`
+	Slug         string        `json:"slug"`
+	Variant      *string       `json:"variant,omitempty"`
+	Translations *Translations `json:"translations,omitempty"`
+}
+
+type Filter struct {
+	Id           string           `json:"id"`
+	Slug         string           `json:"slug"`
+	Title        *string          `json:"title,omitempty"`
+	Translations *Translations    `json:"translations,omitempty"`
+	Variants     []*FilterVariant `json:"variants"`
+}
+
+func GetFilters(categoryId string, withTranslations bool, lang Language) ([]*Filter, error) {
+	result := make([]*Filter, 0)
+
+	tmpl := template.Must(template.New("filtersQuery").Parse(`
+		SELECT f.id as "fId", f.slug as "fSlug", ft.content as title,
+			v.id as "vId", v.slug as "vSlug", vt.content as variant
+			{{if .}}
+				, ft.lang as "fLang", vt.lang as "vLang"
+			{{end}}
+		FROM filters AS f
+		LEFT JOIN filter_variants AS v ON f.id = v.filter_id 
+		LEFT JOIN translation_items AS fti ON f.title_translation_item = fti.id
+		LEFT JOIN translations AS ft ON fti.id = ft.item_id
+		{{if not .}}
+			AND ft.lang = $2 
+		{{end}}
+		LEFT JOIN translation_items AS vti ON v.variant_translation_item = vti.id
+		LEFT JOIN translations AS vt ON vti.id = vt.item_id
+		{{if not .}}
+			AND vt.lang = $2 
+		{{end}}
+		WHERE f.category_id = $1
+	`))
+
+	query := ExecuteTemplate(tmpl, withTranslations)
+	args := []any{categoryId}
+	if !withTranslations {
+		args = append(args, lang)
+	}
+
+	rows, err := db.Client.Query(db.Ctx, query, args...)
+	if err != nil {
+		return result, err
+	}
+	defer rows.Close()
+
+	filterMap := make(map[string]*Filter)
+
+	if !withTranslations {
+		for rows.Next() {
+			var fId, fSlug, title, vId, vSlug, variant string
+			err = rows.Scan(&fId, &fSlug, &title, &vId, &vSlug, &variant)
+			if err != nil {
+				return result, err
+			}
+
+			filter, ok := filterMap[fId]
+			if !ok {
+				filter = &Filter{Id: fId, Slug: fSlug, Title: &title}
+				filterMap[fId] = filter
+				result = append(result, filter)
+			}
+			filter.Variants = append(filter.Variants, &FilterVariant{Id: vId, Slug: vSlug, Variant: &variant})
+		}
+
+		return result, nil
+	}
+
+	variantMap := make(map[*Filter]map[string]*FilterVariant)
+	for rows.Next() {
+		var fId, fSlug, title, vId, vSlug, variantTitle, fLang, vLang string
+		err = rows.Scan(&fId, &fSlug, &title, &vId, &vSlug, &variantTitle, &fLang, &vLang)
+		if err != nil {
+			return result, err
+		}
+
+		filter, ok := filterMap[fId]
+		if !ok {
+			filter = &Filter{Id: fId, Slug: fSlug, Translations: &Translations{}}
+			filterMap[fId] = filter
+			variantMap[filter] = make(map[string]*FilterVariant)
+			result = append(result, filter)
+		}
+		if fLang == string(Languages.En) {
+			filter.Translations.En = title
+		} else {
+			filter.Translations.Ua = title
+		}
+
+		variant, ok := variantMap[filter][vId]
+		if !ok {
+			variant = &FilterVariant{Id: vId, Slug: vSlug, Translations: &Translations{}}
+			variantMap[filter][vId] = variant
+			filter.Variants = append(filter.Variants, variant)
+		}
+		if vLang == string(Languages.En) {
+			variant.Translations.En = variantTitle
+		} else {
+			variant.Translations.Ua = variantTitle
+		}
+	}
+
+	return result, nil
+}
+
+type NewFilterVariant struct {
+	Variant Translations `json:"variant" validate:"required"`
+	Slug    string       `json:"slug" validate:"required" mod:"trim"`
+}
+
+type NewFilter struct {
+	Title    Translations       `json:"title" validate:"required"`
+	Slug     string             `json:"slug" validate:"required" mod:"trim"`
+	Variants []NewFilterVariant `json:"variants" validate:"required,dive,required"`
+}
+
+func CreateFilter(categoryId string, f *NewFilter) (string, error) {
+	tx, err := db.Client.Begin(db.Ctx)
+	if err != nil {
+		return "", err
+	}
+	defer tx.Rollback(db.Ctx)
+
+	translationId, err := CreateTranslations(&tx, f.Title)
+	if err != nil {
+		return "", err
+	}
+
+	var filterId string
+	err = pgxscan.Get(db.Ctx, tx, &filterId, `
+		INSERT INTO filters (title_translation_item, slug, category_id)
+		VALUES ($1, $2, $3)
+		RETURNING id;
+	`, translationId, f.Slug, categoryId)
+	if err != nil {
+		return "", err
+	}
+
+	for _, v := range f.Variants {
+		translationId, err = CreateTranslations(&tx, v.Variant)
+		if err != nil {
+			return "", err
+		}
+
+		_, err = tx.Exec(db.Ctx, `
+			INSERT INTO filter_variants (variant_translation_item, slug, filter_id)
+			VALUES ($1, $2, $3);
+		`, translationId, v.Slug, filterId)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	return filterId, tx.Commit(db.Ctx)
+}

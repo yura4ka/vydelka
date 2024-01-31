@@ -9,7 +9,7 @@ import (
 
 func GetCategories(c *fiber.Ctx) error {
 	lang := c.Locals("lang").(services.Language)
-	parentIdQuery := c.Query("parent_id")
+	parentIdQuery := c.Query("parentId")
 	var parentId *string
 	if parentIdQuery != "" {
 		parentId = &parentIdQuery
@@ -75,4 +75,43 @@ func ChangeCategory(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"message": "Ok",
 	})
+}
+
+func GetFilters(c *fiber.Ctx) error {
+	id := c.Params("id")
+	withTranslations := c.QueryBool("withTranslations")
+	lang := c.Locals("lang").(services.Language)
+
+	filters, err := services.GetFilters(id, withTranslations, lang)
+	if err != nil {
+		log.Print(err)
+		return c.SendStatus(500)
+	}
+
+	return c.JSON(filters)
+}
+
+func CreateFilter(c *fiber.Ctx) error {
+	id := c.Params("id")
+	input := new(services.NewFilter)
+	if err := services.ValidateJSON(c, input); err != nil {
+		return err
+	}
+
+	id, err := services.CreateFilter(id, input)
+	if err != nil {
+		if err := services.IsUniqueViolation(err); err != nil {
+			return err
+		}
+		return c.SendStatus(500)
+	}
+
+	return c.JSON(fiber.Map{
+		"id": id,
+	})
+
+}
+
+func ChangeFilters(c *fiber.Ctx) error {
+	return c.SendStatus(204)
 }
