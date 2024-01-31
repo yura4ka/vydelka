@@ -1,3 +1,10 @@
+import { useAuth } from "@/features/auth/useAuth";
+
 export const Home = () => {
-  return <div>Home</div>;
+  const { isAuth, user } = useAuth();
+  return (
+    <div>
+      Home <p>Hello, {isAuth ? user.firstName : "guest"}</p>
+    </div>
+  );
 };

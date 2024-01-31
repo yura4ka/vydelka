@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { PersonIcon } from "@radix-ui/react-icons";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { LanguageToggle } from "../LanguageToggle";
+import { useLogoutMutation } from "@/features/auth/authApiSlice";
 
 const categories = [
   {
@@ -98,11 +99,13 @@ const categories = [
 export const Navbar = () => {
   const { t } = useTranslation();
 
+  const [logout] = useLogoutMutation();
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 max-w-screen-2xl justify-between">
-        <div className="flex gap-4 items-stretch">
-          <Link to="/" className="font-bold text-xl self-center">
+        <div className="flex items-stretch gap-4">
+          <Link to="/" className="self-center text-xl font-bold">
             VYDELKA
           </Link>
           <NavigationMenu>
@@ -141,7 +144,7 @@ export const Navbar = () => {
             <Input placeholder={t("search-placeholder")} />
           </form>
           <div className="flex items-center">
-            <Button size="icon" variant="ghost">
+            <Button size="icon" variant="ghost" onClick={() => logout()}>
               <PersonIcon className="h-5 w-5" />
             </Button>
             <LanguageToggle />
