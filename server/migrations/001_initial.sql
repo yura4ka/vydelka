@@ -40,7 +40,7 @@ CREATE TABLE categories (
   title_translation_item UUID NOT NULL REFERENCES translation_items(id),
   slug VARCHAR(64) NOT NULL UNIQUE,
   parent_id UUID REFERENCES categories(id),
-  image_url TEXT
+  image_url TEXT NOT NULL
 );
 
 CREATE TABLE products (
@@ -48,12 +48,12 @@ CREATE TABLE products (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   slug VARCHAR(256) NOT NULL,
   price DECIMAL NOT NULL CHECK(price > 0),
-  category_id UUID NOT NULL REFERENCES categories(id),
+  category_id UUID NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
   UNIQUE(slug, category_id)
 );
 
 CREATE TABLE product_translations (
-  product_id UUID NOT NULL REFERENCES products(id),
+  product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
   lang language_type NOT NULL,
   title VARCHAR(256) NOT NULL,
   description TEXT NOT NULL CHECK(LENGTH(description) <= 16384),
@@ -87,8 +87,10 @@ CREATE TABLE product_filters (
 
 CREATE TABLE product_images (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  product_id UUID NOT NULL REFERENCES products(id),
-  image_url TEXT NOT NULL
+  product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  image_url TEXT NOT NULL,
+  width INT NOT NULL,
+  height INT NOT NULL
 );
 
 CREATE TABLE users (

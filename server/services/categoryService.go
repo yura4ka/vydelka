@@ -14,7 +14,7 @@ type Category struct {
 	Title     string    `json:"title"`
 	Slug      string    `json:"slug"`
 	ParentId  *string   `json:"parentId,omitempty"`
-	ImageUrl  *string   `json:"imageUrl,omitempty"`
+	ImageUrl  string    `json:"imageUrl"`
 }
 
 func GetCategories(categoryId *string, lang Language) ([]Category, error) {
@@ -46,7 +46,7 @@ type NewCategory struct {
 	Title    Translations `json:"title" validate:"required"`
 	Slug     string       `json:"slug" validate:"required" mod:"trim"`
 	ParentId *string      `json:"parentId" mod:"trim"`
-	ImageUrl *string      `json:"imageUrl" validate:"omitnil,url" mod:"trim"`
+	ImageUrl string       `json:"imageUrl" validate:"url" mod:"trim"`
 }
 
 func CreateCategory(c *NewCategory) (string, error) {
