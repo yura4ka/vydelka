@@ -168,3 +168,29 @@ func ChangeFilterVariant(c *fiber.Ctx) error {
 		"message": "Ok",
 	})
 }
+
+func DeleteFilter(c *fiber.Ctx) error {
+	id := c.Params("filterId")
+
+	err := services.DeleteFilter(id)
+	if err != nil {
+		return c.SendStatus(500)
+	}
+
+	return c.JSON(fiber.Map{
+		"message": "Ok",
+	})
+}
+
+func DeleteFilterVariant(c *fiber.Ctx) error {
+	id := c.Params("variantId")
+
+	err := services.DeleteFilterVariant(id)
+	if err != nil {
+		return c.SendStatus(500)
+	}
+
+	return c.JSON(fiber.Map{
+		"message": "Ok",
+	})
+}

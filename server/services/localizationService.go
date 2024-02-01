@@ -60,3 +60,10 @@ func ChangeTranslation(tx *pgx.Tx, t Translations, translationId string) error {
 
 	return err
 }
+
+func DeleteTranslation(tx *pgx.Tx, translationId string) error {
+	_, err := (*tx).Exec(db.Ctx, `
+		DELETE FROM translation_items WHERE id = $1;
+	`, translationId)
+	return err
+}

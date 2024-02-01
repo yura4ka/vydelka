@@ -18,4 +18,6 @@ func addCategoryRouter(app *fiber.App) {
 	category.Post("/:id/filters/:filterId/variants", middleware.RequireAdmin, handlers.CreateFilterVariant)
 	category.Put("/:id/filters", middleware.RequireAdmin, handlers.ChangeFilter)
 	category.Put("/:id/filters/:filterId/variants", middleware.RequireAdmin, handlers.ChangeFilterVariant)
+	category.Delete("/:id/filters/:filterId", middleware.RequireAdmin, handlers.DeleteFilter)
+	category.Delete("/:id/filters/:filterId/variants/:variantId", middleware.RequireAdmin, handlers.DeleteFilterVariant)
 }

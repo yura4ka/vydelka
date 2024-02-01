@@ -385,3 +385,53 @@ func ChangeFilterVariant(v *TChangeFilterVariant) error {
 
 	return tx.Commit(db.Ctx)
 }
+
+func DeleteFilter(id string) error {
+	tx, err := db.Client.Begin(db.Ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(db.Ctx)
+
+	var translationId string
+	err = pgxscan.Get(db.Ctx, tx, &translationId, `
+		DELETE FROM filters
+		WHERE id = $1
+		RETURNING title_translation_item;
+	`, id)
+	if err != nil {
+		return err
+	}
+
+	err = DeleteTranslation(&tx, translationId)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit(db.Ctx)
+}
+
+func DeleteFilterVariant(id string) error {
+	tx, err := db.Client.Begin(db.Ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(db.Ctx)
+
+	var translationId string
+	err = pgxscan.Get(db.Ctx, tx, &translationId, `
+		DELETE FROM filter_variants
+		WHERE id = $1
+		RETURNING variant_translation_item;
+	`, id)
+	if err != nil {
+		return err
+	}
+
+	err = DeleteTranslation(&tx, translationId)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit(db.Ctx)
+}
