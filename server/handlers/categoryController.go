@@ -131,6 +131,40 @@ func CreateFilterVariant(c *fiber.Ctx) error {
 	})
 }
 
-func ChangeFilters(c *fiber.Ctx) error {
-	return c.SendStatus(204)
+func ChangeFilter(c *fiber.Ctx) error {
+	input := new(services.TChangeFilter)
+	if err := services.ValidateJSON(c, input); err != nil {
+		return err
+	}
+
+	err := services.ChangeFilter(input)
+	if err != nil {
+		if err := services.IsUniqueViolation(err); err != nil {
+			return err
+		}
+		return c.SendStatus(500)
+	}
+
+	return c.JSON(fiber.Map{
+		"message": "Ok",
+	})
+}
+
+func ChangeFilterVariant(c *fiber.Ctx) error {
+	input := new(services.TChangeFilterVariant)
+	if err := services.ValidateJSON(c, input); err != nil {
+		return err
+	}
+
+	err := services.ChangeFilterVariant(input)
+	if err != nil {
+		if err := services.IsUniqueViolation(err); err != nil {
+			return err
+		}
+		return c.SendStatus(500)
+	}
+
+	return c.JSON(fiber.Map{
+		"message": "Ok",
+	})
 }

@@ -316,11 +316,72 @@ func CreateFilterVariant(filterId string, v *NewFilterVariant) (string, error) {
 	var variantId string
 	err = pgxscan.Get(db.Ctx, tx, &variantId, `
 		INSERT INTO filter_variants (variant_translation_item, slug, filter_id)
-		VALUES ($1, $2, $3);
+		VALUES ($1, $2, $3)
+		RETURNING id;
 	`, translationId, v.Slug, filterId)
 	if err != nil {
 		return "", err
 	}
 
 	return variantId, tx.Commit(db.Ctx)
+}
+
+type TChangeFilter struct {
+	NewFilter
+	Id string `json:"id" validate:"required" mod:"trim"`
+}
+
+func ChangeFilter(f *TChangeFilter) error {
+	tx, err := db.Client.Begin(db.Ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(db.Ctx)
+
+	var translationId string
+	err = pgxscan.Get(db.Ctx, tx, &translationId, `
+		UPDATE filters SET slug = $1
+		WHERE id = $2
+		RETURNING title_translation_item;
+	`, f.Slug, f.Id)
+	if err != nil {
+		return err
+	}
+
+	err = ChangeTranslation(&tx, f.Title, translationId)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit(db.Ctx)
+}
+
+type TChangeFilterVariant struct {
+	NewFilterVariant
+	Id string `json:"id" validate:"required" mod:"trim"`
+}
+
+func ChangeFilterVariant(v *TChangeFilterVariant) error {
+	tx, err := db.Client.Begin(db.Ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(db.Ctx)
+
+	var translationId string
+	err = pgxscan.Get(db.Ctx, tx, &translationId, `
+		UPDATE filter_variants SET slug = $1
+		WHERE id = $2
+		RETURNING variant_translation_item;
+	`, v.Slug, v.Id)
+	if err != nil {
+		return err
+	}
+
+	err = ChangeTranslation(&tx, v.Variant, translationId)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit(db.Ctx)
 }
