@@ -1,6 +1,7 @@
 import { api } from "@/app/api/apiSlice";
 import { Language, Translation } from "../translations";
 import i18next from "i18next";
+import { WithId } from "@/lib/utils";
 
 export type Category = {
   id: string;
@@ -22,9 +23,37 @@ export type CategoryInfo = Category & {
   title: Translation;
 };
 
-export type ChangeCategory = {
+export type ChangeCategory = WithId<NewCategory>;
+
+export type Filter = {
   id: string;
-} & NewCategory;
+  title: string;
+  translations: Translation;
+  slug: string;
+  variants: {
+    id: string;
+    variant: string;
+    translations: Translation;
+    slug: string;
+  }[];
+};
+
+export type NewFilter = {
+  categoryId: string;
+  filter: { title: Translation; slug: string };
+};
+
+export type NewFilterVariant = {
+  categoryId: string;
+  filterId: string;
+  variant: { variant: Translation; slug: string };
+};
+
+export type ChangeFilter = NewFilter & { filter: WithId<NewFilter["filter"]> };
+
+export type ChangeFilterVariant = NewFilterVariant & {
+  variant: WithId<NewFilterVariant["variant"]>;
+};
 
 export const categoryApi = api.injectEndpoints({
   endpoints: (builder) => ({
@@ -92,6 +121,145 @@ export const categoryApi = api.injectEndpoints({
         }
       },
     }),
+
+    getFilters: builder.query<
+      Filter[],
+      { categoryId: string; withTranslations?: boolean }
+    >({
+      query: (args) => ({
+        url: `category/${args.categoryId}/filters?withTranslations=${!!args.withTranslations}`,
+      }),
+      providesTags: (_result, _error, { categoryId }) => [
+        { type: "CategoryFilters", categoryId },
+      ],
+    }),
+
+    createFilter: builder.mutation<{ id: string }, NewFilter>({
+      query: ({ categoryId, filter }) => ({
+        url: `category/${categoryId}/filters`,
+        method: "POST",
+        body: filter,
+      }),
+      onQueryStarted: async (
+        { categoryId, filter },
+        { dispatch, queryFulfilled },
+      ) => {
+        const result = await queryFulfilled;
+        dispatch(
+          categoryApi.util.updateQueryData(
+            "getFilters",
+            { categoryId, withTranslations: true },
+            (draft) => {
+              draft.splice(0, 0, {
+                id: result.data.id,
+                slug: filter.slug,
+                title: "",
+                translations: filter.title,
+                variants: [],
+              });
+            },
+          ),
+        );
+      },
+    }),
+
+    createFilterVariant: builder.mutation<{ id: string }, NewFilterVariant>({
+      query: (args) => ({
+        url: `category/${args.categoryId}/filters/${args.filterId}/variants`,
+        method: "POST",
+        body: args.variant,
+      }),
+      onQueryStarted: async (
+        { categoryId, filterId, variant },
+        { dispatch, queryFulfilled },
+      ) => {
+        const result = await queryFulfilled;
+        dispatch(
+          categoryApi.util.updateQueryData(
+            "getFilters",
+            { categoryId, withTranslations: true },
+            (draft) => {
+              draft
+                .find((f) => f.id === filterId)
+                ?.variants.splice(Infinity, 0, {
+                  id: result.data.id,
+                  slug: variant.slug,
+                  variant: "",
+                  translations: variant.variant,
+                });
+            },
+          ),
+        );
+      },
+    }),
+
+    changeFilter: builder.mutation<undefined, ChangeFilter>({
+      query: (args) => ({
+        url: `category/${args.categoryId}/filters`,
+        method: "PUT",
+        body: args.filter,
+      }),
+      onQueryStarted: async (
+        { categoryId, filter },
+        { dispatch, queryFulfilled },
+      ) => {
+        const patchResult = dispatch(
+          categoryApi.util.updateQueryData(
+            "getFilters",
+            {
+              categoryId: categoryId,
+              withTranslations: true,
+            },
+            (draft) => {
+              Object.assign(draft.find((f) => f.id === filter.id)!, {
+                translations: filter.title,
+                slug: filter.slug,
+              });
+            },
+          ),
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patchResult.undo();
+        }
+      },
+    }),
+
+    changeFilterVariant: builder.mutation<undefined, ChangeFilterVariant>({
+      query: (args) => ({
+        url: `category/${args.categoryId}/filters/${args.filterId}/variants`,
+        method: "PUT",
+        body: args.variant,
+      }),
+      onQueryStarted: async (
+        { categoryId, filterId, variant },
+        { dispatch, queryFulfilled },
+      ) => {
+        const patchResult = dispatch(
+          categoryApi.util.updateQueryData(
+            "getFilters",
+            { categoryId, withTranslations: true },
+            (draft) => {
+              Object.assign(
+                draft
+                  .find((f) => f.id === filterId)!
+                  .variants.find((v) => v.id === variant.id)!,
+                {
+                  translations: variant.variant,
+                  slug: variant.slug,
+                },
+              );
+            },
+          ),
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patchResult.undo();
+        }
+      },
+    }),
   }),
 });
 
@@ -100,4 +268,9 @@ export const {
   useCreateCategoryMutation,
   useChangeCategoryMutation,
   useGetCategoryByIdQuery,
+  useGetFiltersQuery,
+  useCreateFilterMutation,
+  useCreateFilterVariantMutation,
+  useChangeFilterMutation,
+  useChangeFilterVariantMutation,
 } = categoryApi;
