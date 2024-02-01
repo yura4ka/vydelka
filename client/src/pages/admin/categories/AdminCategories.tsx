@@ -11,10 +11,12 @@ import {
 import {
   useGetCategoriesQuery,
   useGetCategoryByIdQuery,
+  useGetFiltersQuery,
 } from "@/features/categories/categoriesApiSlice";
 import { CategoryForm } from "@/features/categories/components/CategoryForm";
 import { useToast } from "@/components/ui/use-toast";
 import { Loader2 } from "lucide-react";
+import { CategoryFiltersForm } from "@/features/categories/components/CategoryFiltersForm";
 
 export const AdminCategories = () => {
   const [params] = useSearchParams();
@@ -24,6 +26,10 @@ export const AdminCategories = () => {
   const { data: categoryInfo } = useGetCategoryByIdQuery(id ?? "", {
     skip: !id,
   });
+  const { data: filters } = useGetFiltersQuery(
+    { categoryId: id ?? "", withTranslations: true },
+    { skip: !id || categories?.length !== 0 },
+  );
 
   const { toast } = useToast();
   const onFormError = (msg: string) => {
@@ -52,6 +58,22 @@ export const AdminCategories = () => {
           onError={onFormError}
         />
       </div>
+      {id && categories?.length === 0 && (
+        <>
+          <h2 className="text-xl font-bold">Filters</h2>
+          {filters ? (
+            <CategoryFiltersForm
+              filters={filters}
+              categoryId={id}
+              onError={onFormError}
+            />
+          ) : (
+            <div className="grid place-content-center">
+              <Loader2 className="animate-spin" />
+            </div>
+          )}
+        </>
+      )}
       <h2 className="text-xl font-bold">Categories</h2>
       <Table>
         {!categories && (
