@@ -68,7 +68,13 @@ export const CategoryForm: React.FC<Props> = ({
       : createCategory({ ...data, parentId });
     request
       .unwrap()
-      .then(() => onSuccess?.())
+      .then(() => {
+        onSuccess?.();
+        if (!initialData) {
+          setForm(initialForm(initialData));
+          setTranslations(createTranslation());
+        }
+      })
       .catch((e: { data: { message: string } }) => onError?.(e.data.message));
   };
 

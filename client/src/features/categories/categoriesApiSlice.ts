@@ -55,6 +55,10 @@ export type ChangeFilterVariant = NewFilterVariant & {
   variant: WithId<NewFilterVariant["variant"]>;
 };
 
+export type DeleteFilter = WithId<Omit<NewFilter, "filter">>;
+
+export type DeleteFilterVariant = WithId<Omit<NewFilterVariant, "variant">>;
+
 export const categoryApi = api.injectEndpoints({
   endpoints: (builder) => ({
     getCategories: builder.query<Category[], string | void>({
@@ -260,6 +264,58 @@ export const categoryApi = api.injectEndpoints({
         }
       },
     }),
+
+    deleteFilter: builder.mutation<undefined, DeleteFilter>({
+      query: (args) => ({
+        url: `category/${args.categoryId}/filters/${args.id}`,
+        method: "DELETE",
+      }),
+      onQueryStarted: async (
+        { categoryId, id },
+        { dispatch, queryFulfilled },
+      ) => {
+        const patchResult = dispatch(
+          categoryApi.util.updateQueryData(
+            "getFilters",
+            { categoryId, withTranslations: true },
+            (draft) => draft.filter((f) => f.id !== id),
+          ),
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patchResult.undo();
+        }
+      },
+    }),
+
+    deleteFilterVariant: builder.mutation<undefined, DeleteFilterVariant>({
+      query: (args) => ({
+        url: `category/${args.categoryId}/filters/${args.filterId}/variants/${args.id}`,
+        method: "DELETE",
+      }),
+      onQueryStarted: async (
+        { categoryId, filterId, id },
+        { dispatch, queryFulfilled },
+      ) => {
+        const patchResult = dispatch(
+          categoryApi.util.updateQueryData(
+            "getFilters",
+            { categoryId, withTranslations: true },
+            (draft) => {
+              const filter = draft.find((f) => f.id === filterId);
+              if (filter)
+                filter.variants = filter.variants.filter((v) => v.id !== id);
+            },
+          ),
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patchResult.undo();
+        }
+      },
+    }),
   }),
 });
 
@@ -273,4 +329,6 @@ export const {
   useCreateFilterVariantMutation,
   useChangeFilterMutation,
   useChangeFilterVariantMutation,
+  useDeleteFilterMutation,
+  useDeleteFilterVariantMutation,
 } = categoryApi;

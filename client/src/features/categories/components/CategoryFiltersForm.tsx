@@ -17,6 +17,8 @@ import {
   useChangeFilterVariantMutation,
   useCreateFilterMutation,
   useCreateFilterVariantMutation,
+  useDeleteFilterMutation,
+  useDeleteFilterVariantMutation,
 } from "../categoriesApiSlice";
 import { FC, Fragment, useState } from "react";
 import { Pencil } from "lucide-react";
@@ -53,6 +55,8 @@ export const CategoryFiltersForm: FC<Props> = ({
   const [createVariant, createVariantStatus] = useCreateFilterVariantMutation();
   const [changeFilter, changeFilterStatus] = useChangeFilterMutation();
   const [changeVariant, changeVariantStatus] = useChangeFilterVariantMutation();
+  const [deleteFilter, deleteFilterStatus] = useDeleteFilterMutation();
+  const [deleteVariant, deleteVariantStatus] = useDeleteFilterVariantMutation();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentFilter, setCurrentFilter] = useState<EditingFilter>(() => ({
@@ -104,12 +108,31 @@ export const CategoryFiltersForm: FC<Props> = ({
       .catch((e: { data: { message: string } }) => onError?.(e.data.message));
   };
 
+  const onDelete = async () => {
+    let request;
+    if (currentFilter.type === "filter")
+      request = deleteFilter({ categoryId, id: currentFilter.data!.id });
+    else
+      request = deleteVariant({
+        categoryId,
+        filterId: currentFilter.filterId!,
+        id: currentFilter.data!.id,
+      });
+
+    await request
+      .unwrap()
+      .then(() => setIsModalOpen(false))
+      .catch(() => onError?.("Cannot delete this item"));
+  };
+
   const translations = Object.entries(form.translations);
   const isLoading =
     createFilterStatus.isLoading ||
     createVariantStatus.isLoading ||
     changeFilterStatus.isLoading ||
-    changeVariantStatus.isLoading;
+    changeVariantStatus.isLoading ||
+    deleteFilterStatus.isLoading ||
+    deleteVariantStatus.isLoading;
   const disabled =
     form.slug.trim().length === 0 ||
     translations.some(([, v]) => v.trim().length === 0);
@@ -203,7 +226,7 @@ export const CategoryFiltersForm: FC<Props> = ({
               )}
             >
               {currentFilter.data && (
-                <Button type="button" variant="destructive">
+                <Button onClick={onDelete} type="button" variant="destructive">
                   Delete
                 </Button>
               )}
