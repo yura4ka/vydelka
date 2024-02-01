@@ -109,7 +109,26 @@ func CreateFilter(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"id": id,
 	})
+}
 
+func CreateFilterVariant(c *fiber.Ctx) error {
+	id := c.Params("filterId")
+	input := new(services.NewFilterVariant)
+	if err := services.ValidateJSON(c, input); err != nil {
+		return err
+	}
+
+	id, err := services.CreateFilterVariant(id, input)
+	if err != nil {
+		if err := services.IsUniqueViolation(err); err != nil {
+			return err
+		}
+		return c.SendStatus(500)
+	}
+
+	return c.JSON(fiber.Map{
+		"id": id,
+	})
 }
 
 func ChangeFilters(c *fiber.Ctx) error {

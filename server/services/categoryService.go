@@ -266,15 +266,9 @@ func GetFilters(categoryId string, withTranslations bool, lang Language) ([]*Fil
 	return result, nil
 }
 
-type NewFilterVariant struct {
-	Variant Translations `json:"variant" validate:"required"`
-	Slug    string       `json:"slug" validate:"required" mod:"trim"`
-}
-
 type NewFilter struct {
-	Title    Translations       `json:"title" validate:"required"`
-	Slug     string             `json:"slug" validate:"required" mod:"trim"`
-	Variants []NewFilterVariant `json:"variants" validate:"required,dive,required"`
+	Title Translations `json:"title" validate:"required"`
+	Slug  string       `json:"slug" validate:"required" mod:"trim"`
 }
 
 func CreateFilter(categoryId string, f *NewFilter) (string, error) {
@@ -299,20 +293,34 @@ func CreateFilter(categoryId string, f *NewFilter) (string, error) {
 		return "", err
 	}
 
-	for _, v := range f.Variants {
-		translationId, err = CreateTranslations(&tx, v.Variant)
-		if err != nil {
-			return "", err
-		}
+	return filterId, tx.Commit(db.Ctx)
+}
 
-		_, err = tx.Exec(db.Ctx, `
-			INSERT INTO filter_variants (variant_translation_item, slug, filter_id)
-			VALUES ($1, $2, $3);
-		`, translationId, v.Slug, filterId)
-		if err != nil {
-			return "", err
-		}
+type NewFilterVariant struct {
+	Variant Translations `json:"variant" validate:"required"`
+	Slug    string       `json:"slug" validate:"required" mod:"trim"`
+}
+
+func CreateFilterVariant(filterId string, v *NewFilterVariant) (string, error) {
+	tx, err := db.Client.Begin(db.Ctx)
+	if err != nil {
+		return "", err
+	}
+	defer tx.Rollback(db.Ctx)
+
+	translationId, err := CreateTranslations(&tx, v.Variant)
+	if err != nil {
+		return "", err
 	}
 
-	return filterId, tx.Commit(db.Ctx)
+	var variantId string
+	err = pgxscan.Get(db.Ctx, tx, &variantId, `
+		INSERT INTO filter_variants (variant_translation_item, slug, filter_id)
+		VALUES ($1, $2, $3);
+	`, translationId, v.Slug, filterId)
+	if err != nil {
+		return "", err
+	}
+
+	return variantId, tx.Commit(db.Ctx)
 }
