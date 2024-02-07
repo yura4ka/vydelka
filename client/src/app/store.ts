@@ -8,7 +8,7 @@ export const store = configureStore({
     auth: authReducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(api.middleware),
+    getDefaultMiddleware({ serializableCheck: false }).concat(api.middleware),
   devTools: import.meta.env.DEV,
 });
 
