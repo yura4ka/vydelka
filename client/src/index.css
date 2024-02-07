@@ -76,3 +76,13 @@
     --l-accent: 53.1%;
   }
 }
+
+@layer utilities {
+  .scrollbar::-webkit-scrollbar {
+    @apply w-2 rounded bg-transparent;
+  }
+
+  .scrollbar::-webkit-scrollbar-thumb {
+    @apply rounded-sm bg-secondary outline-none;
+  }
+}

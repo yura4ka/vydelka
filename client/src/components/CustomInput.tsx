@@ -28,7 +28,7 @@ export const CustomInput: FC<CustomInputProps> = ({
   ...rest
 }) => {
   const createdId = useId();
-  const id = rest.id || label || "input-" + createdId;
+  const id = "input-" + label + (rest.id ?? createdId);
   const nonEmptyError = isError && value?.toString().trim().length !== 0;
 
   const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
