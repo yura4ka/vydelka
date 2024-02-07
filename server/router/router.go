@@ -7,4 +7,5 @@ import (
 func SetupRouter(app *fiber.App) {
 	addAuthRouter(app)
 	addCategoryRouter(app)
+	addProductRouter(app)
 }
