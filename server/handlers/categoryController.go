@@ -194,3 +194,18 @@ func DeleteFilterVariant(c *fiber.Ctx) error {
 		"message": "Ok",
 	})
 }
+
+func GetProducts(c *fiber.Ctx) error {
+	categoryId := c.Params("id")
+	withTranslations := c.QueryBool("withTranslations")
+	lang := c.Locals("lang").(services.Language)
+
+	products, err := services.GetProducts(
+		&services.ProductsRequest{CategoryId: categoryId, WithTranslations: withTranslations, Lang: lang},
+	)
+	if err != nil {
+		return c.SendStatus(400)
+	}
+
+	return c.JSON(products)
+}
