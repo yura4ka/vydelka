@@ -23,3 +23,22 @@ func CreateProduct(c *fiber.Ctx) error {
 		"id": id,
 	})
 }
+
+func ChangeProduct(c *fiber.Ctx) error {
+	input := new(services.TChangeProduct)
+	if err := services.ValidateJSON(c, input); err != nil {
+		return err
+	}
+
+	err := services.ChangeProduct(input)
+	if err != nil {
+		if err := services.IsUniqueViolation(err); err != nil {
+			return err
+		}
+		return c.SendStatus(500)
+	}
+
+	return c.JSON(fiber.Map{
+		"message": "Ok",
+	})
+}

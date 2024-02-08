@@ -6,6 +6,7 @@ import (
 	"text/template"
 
 	"github.com/georgysavva/scany/v2/pgxscan"
+	"github.com/jackc/pgx/v5"
 	"github.com/yura4ka/vydelka/db"
 )
 
@@ -16,15 +17,50 @@ type ProductImage struct {
 	Height   int    `json:"height" validate:"required,min=200"`
 }
 
-type NewProduct struct {
-	Id          string
+type baseProductMutation struct {
 	Slug        string         `json:"slug" validate:"required" mod:"trim"`
 	Price       uint64         `json:"price" validate:"required,min=0"`
 	Title       Translations   `json:"title" validate:"required"`
 	Description Translations   `json:"description" validate:"required"`
-	CategoryId  string         `json:"categoryId" validate:"required" mod:"trim"`
 	Filters     []string       `json:"filters" validate:"required"`
 	Images      []ProductImage `json:"images" validate:"required,min=1"`
+}
+
+type NewProduct struct {
+	baseProductMutation
+	CategoryId string `json:"categoryId" validate:"required" mod:"trim"`
+}
+
+func addProductFilters(tx *pgx.Tx, id string, filters []string) error {
+	query := "INSERT INTO product_filters (product_id, variant_id) VALUES\n"
+	args := make([]any, len(filters)+1)
+	args[0] = id
+	values := make([]string, len(filters))
+
+	for i, v := range filters {
+		values[i] = fmt.Sprintf("($1, $%d)", i+2)
+		args[i+1] = v
+	}
+
+	_, err := (*tx).Exec(db.Ctx, query+strings.Join(values, ","), args...)
+	return err
+}
+
+func addProductImages(tx *pgx.Tx, id string, images []ProductImage) error {
+	query := "INSERT INTO product_images (product_id, id, image_url, width, height) VALUES\n"
+	args := make([]any, 0, len(images)*3+1)
+	args = append(args, id)
+	values := make([]string, len(images))
+
+	argCount := 2
+	for i, v := range images {
+		values[i] = fmt.Sprintf("($1, $%d, $%d, $%d, $%d)", argCount, argCount+1, argCount+2, argCount+3)
+		args = append(args, v.Id, v.ImageUrl, v.Width, v.Height)
+		argCount += 4
+	}
+
+	_, err := (*tx).Exec(db.Ctx, query+strings.Join(values, ","), args...)
+	return err
 }
 
 func CreateProduct(p *NewProduct) (string, error) {
@@ -52,35 +88,11 @@ func CreateProduct(p *NewProduct) (string, error) {
 		return "", err
 	}
 
-	query := "INSERT INTO product_filters (product_id, variant_id) VALUES\n"
-	args := make([]any, len(p.Filters)+1)
-	args[0] = id
-	values := make([]string, len(p.Filters))
-
-	for i, v := range p.Filters {
-		values[i] = fmt.Sprintf("($1, $%d)", i+2)
-		args[i+1] = v
-	}
-
-	_, err = tx.Exec(db.Ctx, query+strings.Join(values, ","), args...)
-	if err != nil {
+	if err := addProductFilters(&tx, id, p.Filters); err != nil {
 		return "", err
 	}
 
-	query = "INSERT INTO product_images (product_id, id, image_url, width, height) VALUES\n"
-	args = make([]any, 0, len(p.Images)*3+1)
-	args = append(args, id)
-	values = make([]string, len(p.Images))
-
-	argCount := 2
-	for i, v := range p.Images {
-		values[i] = fmt.Sprintf("($1, $%d, $%d, $%d, $%d)", argCount, argCount+1, argCount+2, argCount+3)
-		args = append(args, v.Id, v.ImageUrl, v.Width, v.Height)
-		argCount += 4
-	}
-
-	_, err = tx.Exec(db.Ctx, query+strings.Join(values, ","), args...)
-	if err != nil {
+	if err := addProductImages(&tx, id, p.Images); err != nil {
 		return "", err
 	}
 
@@ -181,4 +193,70 @@ func GetProducts(request *ProductsRequest) ([]Product, error) {
 	}
 
 	return result, err
+}
+
+type TChangeProduct struct {
+	baseProductMutation
+	Id string `json:"id" validate:"required"`
+}
+
+func ChangeProduct(p *TChangeProduct) error {
+	tx, err := db.Client.Begin(db.Ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(db.Ctx)
+
+	_, err = tx.Exec(db.Ctx, `
+		UPDATE products 
+		SET slug = $1, price = $2
+		WHERE id = $3;
+	`, p.Slug, p.Price, p.Id)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(db.Ctx, `
+		UPDATE product_translations 
+		SET title = $1, description = $2
+		WHERE product_id = $3 AND lang = $4;
+	`, p.Title.En, p.Description.En, p.Id, Languages.En)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(db.Ctx, `
+		UPDATE product_translations 
+		SET title = $1, description = $2
+		WHERE product_id = $3 AND lang = $4;
+	`, p.Title.Ua, p.Description.Ua, p.Id, Languages.Ua)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(db.Ctx, `
+		DELETE FROM product_filters
+		WHERE product_id = $1;
+	`, p.Id)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(db.Ctx, `
+		DELETE FROM product_images
+		WHERE product_id = $1;
+	`, p.Id)
+	if err != nil {
+		return err
+	}
+
+	if err := addProductFilters(&tx, p.Id, p.Filters); err != nil {
+		return err
+	}
+
+	if err := addProductImages(&tx, p.Id, p.Images); err != nil {
+		return err
+	}
+
+	return tx.Commit(db.Ctx)
 }

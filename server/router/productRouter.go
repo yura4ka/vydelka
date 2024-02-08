@@ -10,4 +10,5 @@ func addProductRouter(app *fiber.App) {
 	product := app.Group("product")
 
 	product.Post("/", middleware.RequireAdmin, handlers.CreateProduct)
+	product.Put("/", middleware.RequireAdmin, handlers.ChangeProduct)
 }
