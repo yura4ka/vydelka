@@ -27,22 +27,27 @@ import { ProductForm } from "@/features/products/components/ProductForm";
 import { useTranslation } from "react-i18next";
 import { Language } from "@/features/translations";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 type CategoriesTableProps = {
   categories: Category[] | undefined;
+  isLoading: boolean;
 };
 
-const CategoriesTable: React.FC<CategoriesTableProps> = ({ categories }) => {
+const CategoriesTable: React.FC<CategoriesTableProps> = ({
+  categories,
+  isLoading,
+}) => {
   return (
     <>
       <h2 className="text-xl font-bold">Categories</h2>
       <Table>
-        {!categories && (
+        {isLoading && (
           <TableCaption className="overflow-y-hidden">
             <Loader2 className="animate-spin" />
           </TableCaption>
         )}
-        {categories?.length === 0 && (
+        {!isLoading && categories?.length === 0 && (
           <TableCaption>No categories...</TableCaption>
         )}
         <TableHeader>
@@ -92,16 +97,17 @@ export const AdminCategories = () => {
   const [params] = useSearchParams();
   const id = params.get("id") ?? undefined;
 
-  const { data: categories } = useGetCategoriesQuery(id);
+  const { data: categories, isFetching: isCategoriesLoading } =
+    useGetCategoriesQuery(id);
   const { data: categoryInfo } = useGetCategoryByIdQuery(id ?? "", {
     skip: !id,
   });
-  const { data: filters, isLoading: isFiltersLoading } = useGetFiltersQuery(
+  const { data: filters } = useGetFiltersQuery(
     { categoryId: id ?? "", withTranslations: true },
     { skip: !id || categories?.length !== 0 },
   );
 
-  const { data: products, isLoading: isProductsLoading } = useGetProductsQuery(
+  const { data: products } = useGetProductsQuery(
     { categoryId: id ?? "", withTranslations: true },
     { skip: !id || categories?.length !== 0 },
   );
@@ -119,11 +125,7 @@ export const AdminCategories = () => {
   };
 
   const isSubcategoriesAllowed =
-    !id ||
-    (!isFiltersLoading &&
-      !isProductsLoading &&
-      (!filters || filters.length === 0) &&
-      (!products || products.length === 0));
+    !id || (filters?.length === 0 && products?.length === 0);
   const isFinalCategory = !categories || categories.length === 0;
 
   return (
@@ -167,7 +169,17 @@ export const AdminCategories = () => {
         </>
       )}
 
-      {isSubcategoriesAllowed && <CategoriesTable categories={categories} />}
+      {!isSubcategoriesAllowed && isCategoriesLoading && (
+        <div className="grid place-content-center">
+          <Loader2 className="animate-spin" />
+        </div>
+      )}
+      {isSubcategoriesAllowed && (
+        <CategoriesTable
+          categories={categories}
+          isLoading={isCategoriesLoading}
+        />
+      )}
 
       {id && isFinalCategory && (
         <>
@@ -191,7 +203,7 @@ export const AdminCategories = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow>
+              <TableRow className={cn(!products && "hidden")}>
                 <TableCell colSpan={6}>
                   <button
                     onClick={() => setProductModal({ isOpen: true })}
