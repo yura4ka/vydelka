@@ -42,3 +42,13 @@ func ChangeProduct(c *fiber.Ctx) error {
 		"message": "Ok",
 	})
 }
+
+func DeleteProduct(c *fiber.Ctx) error {
+	id := c.Params("id")
+	if err := services.DeleteProduct(id); err != nil {
+		return c.SendStatus(500)
+	}
+	return c.JSON(fiber.Map{
+		"message": "Ok",
+	})
+}

@@ -260,3 +260,10 @@ func ChangeProduct(p *TChangeProduct) error {
 
 	return tx.Commit(db.Ctx)
 }
+
+func DeleteProduct(id string) error {
+	_, err := db.Client.Exec(db.Ctx, `
+		DELETE FROM products WHERE id = $1;
+	`, id)
+	return err
+}
