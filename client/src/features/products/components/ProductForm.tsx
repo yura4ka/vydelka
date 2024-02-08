@@ -11,6 +11,7 @@ import {
   ProductImage,
   ProductFilterVariant,
   useCreateProductMutation,
+  useChangeProductMutation,
 } from "../productsApiSlice";
 import { CustomInput } from "@/components/CustomInput";
 import { SubmitButton } from "@/components/SubmitButton";
@@ -30,7 +31,7 @@ const initialForm = (initialData?: Product) => ({
   title: initialData?.titleTranslations ?? createTranslation(),
   description: initialData?.descriptionTranslations ?? createTranslation(),
   slug: initialData?.slug ?? "",
-  price: initialData?.price ?? 0,
+  price: (initialData?.price ?? 0) / 100,
   filters: initialData?.filters ?? new Map<string, ProductFilterVariant>(),
   images: (initialData?.images.map((img) => ({
     uuid: img.id,
@@ -93,6 +94,7 @@ export const ProductForm: React.FC<Props> = ({
   }, [initialData]);
 
   const [createProduct, createStatus] = useCreateProductMutation();
+  const [changeProduct, changeStatus] = useChangeProductMutation();
 
   const title = Object.entries(form.title);
   const description = Object.entries(form.description);
@@ -112,16 +114,22 @@ export const ProductForm: React.FC<Props> = ({
 
     const price = form.price * 100;
 
-    createProduct({ ...form, filters, images, categoryId, price })
+    const request = initialData
+      ? changeProduct({ ...form, filters, images, price, id: initialData.id })
+      : createProduct({ ...form, filters, images, categoryId, price });
+    request
       .unwrap()
       .then(() => {
         setOpen(false);
         setForm(initialForm());
       })
-      .catch((e) => onError?.(e.data.message));
+      .catch((e) => {
+        console.log(e);
+        onError?.(e.data.message);
+      });
   };
 
-  const isLoading = createStatus.isLoading;
+  const isLoading = createStatus.isLoading || changeStatus.isLoading;
   const disabled = !checkForm(form, filters.length);
 
   return (

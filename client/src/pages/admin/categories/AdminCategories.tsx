@@ -204,7 +204,7 @@ export const AdminCategories = () => {
               {products?.map((p) => (
                 <TableRow key={p.id}>
                   <TableCell>{p.titleTranslations[lang]}</TableCell>
-                  <TableCell>{p.price}</TableCell>
+                  <TableCell>{p.price / 100}</TableCell>
                   <TableCell className="max-w-24">
                     <p className="line-clamp-1">
                       {p.descriptionTranslations[lang]}

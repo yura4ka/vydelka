@@ -1,5 +1,6 @@
 import { api } from "@/app/api/apiSlice";
 import { Translation } from "../translations";
+import { WithId } from "@/lib/utils";
 
 export type ProductImage = {
   id: string;
@@ -47,10 +48,15 @@ export type ProductsRequest = {
   withTranslations?: boolean;
 };
 
+export type ChangeProduct = WithId<Omit<NewProduct, "categoryId">>;
+
 export const productApi = api.injectEndpoints({
   endpoints: (builder) => ({
     createProduct: builder.mutation<{ id: string }, NewProduct>({
       query: (body) => ({ url: `product`, method: "POST", body }),
+      invalidatesTags: (_result, _error, args) => [
+        { type: "Products", categoryId: args.categoryId },
+      ],
     }),
 
     getProducts: builder.query<Product[], ProductsRequest>({
@@ -70,9 +76,28 @@ export const productApi = api.injectEndpoints({
               })),
               { type: "Products", id: "LIST", categoryId: args.categoryId },
             ]
-          : [{ type: "CategoryList", id: "LIST", categoryId: args.categoryId }],
+          : [{ type: "Products", id: "LIST", categoryId: args.categoryId }],
+    }),
+
+    changeProduct: builder.mutation<undefined, ChangeProduct>({
+      query: (body) => ({ url: `product`, method: "PUT", body }),
+      invalidatesTags: (_result, _error, args) => [
+        { type: "Products", id: args.id },
+      ],
+    }),
+
+    deleteProduct: builder.mutation<undefined, string>({
+      query: (id) => ({ url: `product/${id}`, method: "DELETE" }),
+      invalidatesTags: (_result, _error, args) => [
+        { type: "Products", id: args },
+      ],
     }),
   }),
 });
 
-export const { useCreateProductMutation, useGetProductsQuery } = productApi;
+export const {
+  useCreateProductMutation,
+  useGetProductsQuery,
+  useChangeProductMutation,
+  useDeleteProductMutation,
+} = productApi;
