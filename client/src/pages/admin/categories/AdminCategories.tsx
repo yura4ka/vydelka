@@ -119,10 +119,11 @@ export const AdminCategories = () => {
   };
 
   const isSubcategoriesAllowed =
-    !isFiltersLoading &&
-    !isProductsLoading &&
-    (!filters || filters.length === 0) &&
-    (!products || products.length === 0);
+    !id ||
+    (!isFiltersLoading &&
+      !isProductsLoading &&
+      (!filters || filters.length === 0) &&
+      (!products || products.length === 0));
   const isFinalCategory = !categories || categories.length === 0;
 
   return (
