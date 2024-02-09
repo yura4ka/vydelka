@@ -194,30 +194,3 @@ func DeleteFilterVariant(c *fiber.Ctx) error {
 		"message": "Ok",
 	})
 }
-
-func GetProducts(c *fiber.Ctx) error {
-	categoryId := c.Params("id")
-	withTranslations := c.QueryBool("withTranslations")
-	page := c.QueryInt("page", 1)
-	lang := c.Locals("lang").(services.Language)
-
-	request := &services.ProductsRequest{
-		CategoryId: categoryId, WithTranslations: withTranslations, Lang: lang, Page: page,
-	}
-
-	products, err := services.GetProducts(request)
-	if err != nil {
-		return c.SendStatus(500)
-	}
-
-	hasMore, total, err := services.HasMoreProducts(request)
-	if err != nil {
-		return c.SendStatus(500)
-	}
-
-	return c.JSON(fiber.Map{
-		"products":   products,
-		"hasMore":    hasMore,
-		"totalPages": total,
-	})
-}

@@ -5,6 +5,31 @@ import (
 	"github.com/yura4ka/vydelka/services"
 )
 
+func GetProducts(c *fiber.Ctx) error {
+	request := &services.ProductsRequest{
+		CategoryId:       c.Query("categoryId"),
+		WithTranslations: c.QueryBool("withTranslations"),
+		Page:             c.QueryInt("page", 1),
+		Lang:             c.Locals("lang").(services.Language),
+	}
+
+	products, err := services.GetProducts(request)
+	if err != nil {
+		return c.SendStatus(500)
+	}
+
+	hasMore, total, err := services.HasMoreProducts(request)
+	if err != nil {
+		return c.SendStatus(500)
+	}
+
+	return c.JSON(fiber.Map{
+		"products":   products,
+		"hasMore":    hasMore,
+		"totalPages": total,
+	})
+}
+
 func CreateProduct(c *fiber.Ctx) error {
 	input := new(services.NewProduct)
 	if err := services.ValidateJSON(c, input); err != nil {

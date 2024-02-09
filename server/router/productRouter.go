@@ -9,6 +9,7 @@ import (
 func addProductRouter(app *fiber.App) {
 	product := app.Group("product")
 
+	product.Get("/", handlers.GetProducts)
 	product.Post("/", middleware.RequireAdmin, handlers.CreateProduct)
 	product.Put("/", middleware.RequireAdmin, handlers.ChangeProduct)
 	product.Delete("/:id", middleware.RequireAdmin, handlers.DeleteProduct)

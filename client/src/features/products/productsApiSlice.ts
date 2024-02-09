@@ -44,7 +44,7 @@ export type NewProduct = {
 };
 
 export type ProductsRequest = {
-  categoryId: string;
+  categoryId?: string;
   withTranslations?: boolean;
   page?: number;
 };
@@ -72,8 +72,12 @@ export const productApi = api.injectEndpoints({
 
     getProducts: builder.query<ProductsResponse, ProductsRequest>({
       query: (args) => ({
-        url: `category/${args.categoryId}/products`,
-        params: { withTranslations: args.withTranslations, page: args.page },
+        url: `product`,
+        params: {
+          withTranslations: args.withTranslations,
+          page: args.page,
+          categoryId: args.categoryId,
+        },
       }),
       transformResponse: (response: ProductsResponseNonTransformed) => {
         const products = response.products.map((r) => ({
