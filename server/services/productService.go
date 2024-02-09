@@ -10,6 +10,8 @@ import (
 	"github.com/yura4ka/vydelka/db"
 )
 
+const PRODUCTS_PER_PAGE = 36
+
 type ProductImage struct {
 	Id       string `json:"id" validate:"required"`
 	ImageUrl string `json:"imageUrl" validate:"url"`
@@ -99,19 +101,6 @@ func CreateProduct(p *NewProduct) (string, error) {
 	return id, tx.Commit(db.Ctx)
 }
 
-type ProductsRequest struct {
-	CategoryId       string
-	WithTranslations bool
-	Lang             Language
-}
-
-type ProductFilter struct {
-	Id       string `json:"id"`
-	Slug     string `json:"slug"`
-	Variant  string `json:"variant"`
-	FilterId string `json:"filterId"`
-}
-
 type Product struct {
 	Id                      string           `json:"id"`
 	Slug                    string           `json:"slug"`
@@ -129,10 +118,24 @@ type productTranslation struct {
 	Description string
 }
 
+type ProductFilter struct {
+	Id       string `json:"id"`
+	Slug     string `json:"slug"`
+	Variant  string `json:"variant"`
+	FilterId string `json:"filterId"`
+}
+
 type dbProduct struct {
 	Product
 	Filters      []ProductFilter `json:"filters"`
 	Translations map[Language]productTranslation
+}
+
+type ProductsRequest struct {
+	CategoryId       string
+	WithTranslations bool
+	Lang             Language
+	Page             int
 }
 
 func GetProducts(request *ProductsRequest) ([]Product, error) {
@@ -165,13 +168,15 @@ func GetProducts(request *ProductsRequest) ([]Product, error) {
 		GROUP BY p.id
 		{{if not .WithTranslations}}
 			, pt.title, pt.description
-		{{end}};
+		{{end}}
+		LIMIT $3 OFFSET $4;
 	`))
 
 	query := ExecuteTemplate(tmpl, request)
+	offset := (request.Page - 1) * PRODUCTS_PER_PAGE
 
 	products := make([]dbProduct, 0)
-	err := pgxscan.Select(db.Ctx, db.Client, &products, query, request.Lang, request.CategoryId)
+	err := pgxscan.Select(db.Ctx, db.Client, &products, query, request.Lang, request.CategoryId, PRODUCTS_PER_PAGE, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -193,6 +198,27 @@ func GetProducts(request *ProductsRequest) ([]Product, error) {
 	}
 
 	return result, err
+}
+
+func HasMoreProducts(request *ProductsRequest) (bool, int, error) {
+	tmpl := template.Must(template.New("productsTotalQuery").Parse(`
+		SELECT COUNT(*) 
+		FROM products AS p
+		WHERE p.category_id = $1;
+	`))
+
+	query := ExecuteTemplate(tmpl, request)
+
+	var total int
+	err := pgxscan.Get(db.Ctx, db.Client, &total, query, request.CategoryId)
+	if err != nil {
+		return false, 0, err
+	}
+
+	hasMore := total > request.Page*PRODUCTS_PER_PAGE
+	totalPages := (total + PRODUCTS_PER_PAGE - 1) / PRODUCTS_PER_PAGE
+
+	return hasMore, totalPages, nil
 }
 
 type TChangeProduct struct {
