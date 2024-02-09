@@ -46,6 +46,17 @@ export type NewProduct = {
 export type ProductsRequest = {
   categoryId: string;
   withTranslations?: boolean;
+  page?: number;
+};
+
+export type ProductsResponse = {
+  products: Product[];
+  hasMore: boolean;
+  totalPages: number;
+};
+
+export type ProductsResponseNonTransformed = ProductsResponse & {
+  products: (Product & { filters: [string, ProductFilterVariant][] })[];
 };
 
 export type ChangeProduct = WithId<Omit<NewProduct, "categoryId">>;
@@ -59,17 +70,22 @@ export const productApi = api.injectEndpoints({
       ],
     }),
 
-    getProducts: builder.query<Product[], ProductsRequest>({
+    getProducts: builder.query<ProductsResponse, ProductsRequest>({
       query: (args) => ({
-        url: `category/${args.categoryId}/products?withTranslations=${!!args.withTranslations}`,
+        url: `category/${args.categoryId}/products`,
+        params: { withTranslations: args.withTranslations, page: args.page },
       }),
-      transformResponse: (
-        response: (Product & { filters: [string, ProductFilterVariant][] })[],
-      ) => response.map((r) => ({ ...r, filters: new Map(r.filters) })),
+      transformResponse: (response: ProductsResponseNonTransformed) => {
+        const products = response.products.map((r) => ({
+          ...r,
+          filters: new Map(r.filters),
+        }));
+        return { ...response, products };
+      },
       providesTags: (result, _, args) =>
         result
           ? [
-              ...result.map((p) => ({
+              ...result.products.map((p) => ({
                 type: "Products" as const,
                 id: p.id,
                 categoryId: args.categoryId,
