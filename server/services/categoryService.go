@@ -435,3 +435,67 @@ func DeleteFilterVariant(id string) error {
 
 	return tx.Commit(db.Ctx)
 }
+
+type NavigationCategory struct {
+	Category
+	Subcategories []*NavigationCategory `json:"subcategories,omitempty"`
+}
+
+func GetNavigationCategories(lang Language, parentId string) ([]*NavigationCategory, error) {
+	tmpl := template.Must(template.New("navigationQuery").Parse(`
+		WITH RECURSIVE category_hierarchy AS (
+			SELECT *, 0 AS level
+    	FROM categories
+			{{if .}}
+				WHERE parent_id = $2
+			{{else}}
+				WHERE parent_id IS NULL
+			{{end}}
+
+			UNION ALL
+
+			SELECT c.*, ch.level + 1
+			FROM categories c
+			JOIN category_hierarchy ch ON c.parent_id = ch.id
+		)
+
+		SELECT c.id, c.created_at, t.content as title, c.slug, c.parent_id, c.image_url
+		FROM category_hierarchy AS c
+		LEFT JOIN translation_items AS ti ON c.title_translation_item = ti.id
+		LEFT JOIN translations AS t ON ti.id = t.item_id AND lang = $1
+		ORDER BY level;
+	`))
+
+	query := ExecuteTemplate(tmpl, parentId)
+	args := []any{lang}
+	if parentId != "" {
+		args = append(args, parentId)
+	}
+
+	rows, err := db.Client.Query(db.Ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]*NavigationCategory, 0)
+	categoryMap := make(map[string]*NavigationCategory)
+
+	for rows.Next() {
+		var c NavigationCategory
+		err = pgxscan.ScanRow(&c, rows)
+		if err != nil {
+			return nil, err
+		}
+
+		categoryMap[c.Id] = &c
+
+		if c.ParentId == nil {
+			result = append(result, &c)
+		} else {
+			parent := categoryMap[*c.ParentId]
+			parent.Subcategories = append(parent.Subcategories, &c)
+		}
+	}
+
+	return result, nil
+}

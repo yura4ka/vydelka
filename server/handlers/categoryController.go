@@ -194,3 +194,15 @@ func DeleteFilterVariant(c *fiber.Ctx) error {
 		"message": "Ok",
 	})
 }
+
+func GetNavigationCategories(c *fiber.Ctx) error {
+	id := c.Query("id")
+	lang := c.Locals("lang").(services.Language)
+
+	categories, err := services.GetNavigationCategories(lang, id)
+	if err != nil {
+		return c.SendStatus(500)
+	}
+
+	return c.JSON(categories)
+}
