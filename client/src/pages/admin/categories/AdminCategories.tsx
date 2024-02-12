@@ -236,7 +236,9 @@ export const AdminCategories = () => {
   };
 
   const isSubcategoriesAllowed =
-    !id || (filters?.length === 0 && productsResponse?.products.length === 0);
+    !id ||
+    ((!filters || filters.length === 0) &&
+      (!productsResponse || productsResponse.products.length === 0));
   const isFinalCategory = !categories || categories.length === 0;
 
   return (
