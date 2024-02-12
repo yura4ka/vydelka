@@ -59,6 +59,10 @@ export type DeleteFilter = WithId<Omit<NewFilter, "filter">>;
 
 export type DeleteFilterVariant = WithId<Omit<NewFilterVariant, "variant">>;
 
+export type CategoryNavigation = Category & {
+  subcategories?: CategoryNavigation[];
+};
+
 export const categoryApi = api.injectEndpoints({
   endpoints: (builder) => ({
     getCategories: builder.query<Category[], string | void>({
@@ -78,6 +82,7 @@ export const categoryApi = api.injectEndpoints({
 
     createCategory: builder.mutation<{ id: string }, NewCategory>({
       query: (body) => ({ url: `category`, method: "POST", body }),
+      invalidatesTags: ["CategoryNavigation"],
       onQueryStarted: async (category, { dispatch, queryFulfilled }) => {
         const lang = i18next.resolvedLanguage as Language;
         const result = await queryFulfilled;
@@ -107,6 +112,7 @@ export const categoryApi = api.injectEndpoints({
       query: (body) => ({ url: `category`, method: "PUT", body }),
       invalidatesTags: (_result, _error, category) => [
         { type: "CategoryList", id: category.id },
+        "CategoryNavigation",
       ],
       onQueryStarted: async (category, { dispatch, queryFulfilled }) => {
         const patchResult = dispatch(
@@ -316,6 +322,11 @@ export const categoryApi = api.injectEndpoints({
         }
       },
     }),
+
+    getCategoryNavigation: builder.query<CategoryNavigation[], string | void>({
+      query: (id) => ({ url: `category/navigation`, params: { id } }),
+      providesTags: ["CategoryNavigation"],
+    }),
   }),
 });
 
@@ -331,4 +342,5 @@ export const {
   useChangeFilterVariantMutation,
   useDeleteFilterMutation,
   useDeleteFilterVariantMutation,
+  useGetCategoryNavigationQuery,
 } = categoryApi;
