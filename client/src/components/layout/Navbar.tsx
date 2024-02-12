@@ -1,10 +1,13 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/theme/ThemeToggle";
-import { LanguageToggle } from "../LanguageToggle";
+import { useAuth } from "@/features/auth/useAuth";
 import { useLogoutMutation } from "@/features/auth/authApiSlice";
+import {
+  CategoryNavigation,
+  useGetCategoryNavigationQuery,
+} from "@/features/categories/categoriesApiSlice";
+import { cn } from "@/lib/utils";
 import {
   ChevronLeft,
   ChevronRight,
@@ -18,6 +21,10 @@ import {
   UserRound,
 } from "lucide-react";
 import Logo from "@/assets/Fork.svg?react";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { LanguageToggle } from "@/components/LanguageToggle";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -26,13 +33,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
-  CategoryNavigation,
-  useGetCategoryNavigationQuery,
-} from "@/features/categories/categoriesApiSlice";
-import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "../ui/sheet";
-import { useState } from "react";
-import { cn } from "@/lib/utils";
-import { useAuth } from "@/features/auth/useAuth";
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,7 +45,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu";
 
 const MAX_SUB = 10;
 
@@ -243,7 +248,7 @@ const MobileMenu = () => {
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger>
+      <SheetTrigger asChild>
         <Button variant="ghost" size="icon" className="lg:hidden">
           <Menu />
         </Button>
