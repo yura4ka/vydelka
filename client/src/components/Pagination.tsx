@@ -16,7 +16,7 @@ type Props = {
 
 export const Pagination = ({ totalPages, page, onChange }: Props) => {
   const range = useMemo(() => {
-    if (totalPages === 1) return null;
+    if (totalPages <= 1) return null;
 
     const count = 7;
     if (count >= totalPages) return createRange(1, totalPages);
