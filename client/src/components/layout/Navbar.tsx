@@ -45,6 +45,7 @@ import {
 const MAX_SUB = 10;
 
 const Categories = () => {
+  const { t } = useTranslation();
   const { data: categories } = useGetCategoryNavigationQuery();
 
   return (
@@ -85,7 +86,7 @@ const Categories = () => {
                           to={c2.slug}
                           className="block text-sm font-medium transition-colors hover:text-ring"
                         >
-                          View all...
+                          {t("navigation.view-all")}
                         </Link>
                       </li>
                     )}
@@ -97,7 +98,7 @@ const Categories = () => {
                   to={c.slug}
                   className="font-medium transition-colors hover:text-ring"
                 >
-                  View all...
+                  {t("navigation.view-all")}
                 </Link>
               </li>
             </ul>
@@ -108,7 +109,7 @@ const Categories = () => {
             to="categories"
             className="block rounded-bl-md py-2 pl-4 text-sm font-medium transition-colors hover:text-ring"
           >
-            All Categories...
+            {t("navigation.all-Categories")}
           </Link>
         </li>
       </div>
@@ -122,6 +123,8 @@ type MobileProps = {
 };
 
 const MobileCategories: React.FC<MobileProps> = ({ open, setOpen }) => {
+  const { t } = useTranslation();
+
   const { data: categories } = useGetCategoryNavigationQuery();
   const [activeCategory, setActiveCategory] =
     useState<CategoryNavigation | null>(null);
@@ -134,12 +137,14 @@ const MobileCategories: React.FC<MobileProps> = ({ open, setOpen }) => {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
         <button className="flex w-full justify-start gap-1 border-y px-6 py-4 font-bold transition-colors hover:bg-accent">
-          <LayoutGrid className="mr-2" /> Categories
+          <LayoutGrid className="mr-2" /> {t("navigation.categories")}
         </button>
       </DialogTrigger>
       <DialogContent className="min-w-screen left-0 top-0 h-screen max-w-[auto] translate-x-0 translate-y-0 grid-rows-[auto_1fr] px-0 pb-0 data-[state=closed]:duration-300 data-[state=closed]:fade-out-100 data-[state=closed]:zoom-out-100 data-[state=closed]:slide-out-to-left-full data-[state=closed]:slide-out-to-top-0 data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-0">
         <DialogHeader className="sm:text-center">
-          <DialogTitle>{activeCategory?.title ?? "Categories"}</DialogTitle>
+          <DialogTitle>
+            {activeCategory?.title ?? t("navigation.categories")}
+          </DialogTitle>
         </DialogHeader>
         <div className="scrollbar relative overflow-x-hidden overflow-y-scroll">
           <ul className={cn(activeCategory && "h-full overflow-y-hidden")}>
@@ -159,7 +164,7 @@ const MobileCategories: React.FC<MobileProps> = ({ open, setOpen }) => {
                 to="categories"
                 className="block p-4 font-medium transition-colors hover:bg-accent"
               >
-                All Categories...
+                {t("navigation.all-Categories")}
               </Link>
             </li>
           </ul>
@@ -173,8 +178,8 @@ const MobileCategories: React.FC<MobileProps> = ({ open, setOpen }) => {
               onClick={() => setActiveCategory(null)}
               className="flex items-center justify-between gap-1 p-4 font-medium hover:underline"
             >
-              <ChevronLeft className="h-4 w-4 text-muted-foreground" /> All
-              categories
+              <ChevronLeft className="h-4 w-4 text-muted-foreground" />{" "}
+              {t("navigation.all-categories")}
             </button>
             {activeCategory?.subcategories?.map((c2) => (
               <li key={c2.title} className="border-b">
@@ -197,7 +202,7 @@ const MobileCategories: React.FC<MobileProps> = ({ open, setOpen }) => {
                   ))}
                   {c2.subcategories && c2.subcategories.length > MAX_SUB && (
                     <li className="px-4 py-1 text-sm font-medium text-muted-foreground hover:underline">
-                      <Link to={c2.slug}>View all...</Link>
+                      <Link to={c2.slug}>{t("navigation.view-all")}</Link>
                     </li>
                   )}
                 </ul>
@@ -208,7 +213,7 @@ const MobileCategories: React.FC<MobileProps> = ({ open, setOpen }) => {
                 to={activeCategory?.slug ?? ""}
                 className="block p-4 font-medium hover:bg-accent"
               >
-                View all...
+                {t("navigation.view-all")}
               </Link>
             </li>
           </ul>
@@ -219,6 +224,8 @@ const MobileCategories: React.FC<MobileProps> = ({ open, setOpen }) => {
 };
 
 const MobileMenu = () => {
+  const { t } = useTranslation();
+
   const [logout] = useLogoutMutation();
   const { isAuth, user } = useAuth();
 
@@ -272,7 +279,7 @@ const MobileMenu = () => {
               setOpen={onCategoryOpenChange}
             />
             <button className="flex w-full justify-start gap-1 border-b px-6 py-4 font-bold transition-colors hover:bg-accent">
-              <ShoppingCart className="mr-2" /> Cart
+              <ShoppingCart className="mr-2" /> {t("navigation.cart")}
             </button>
             {isAuth && (
               <div onClick={() => setOpen(false)}>
@@ -281,14 +288,14 @@ const MobileMenu = () => {
                   className="flex w-full items-center justify-start gap-1 border-b px-6 py-4 font-bold transition-colors hover:bg-accent"
                 >
                   <UserRound className="mr-2" />
-                  Profile
+                  {t("navigation.profile")}
                 </Link>
                 <Link
                   to={"orders"}
                   className="flex w-full items-center justify-start gap-1 border-b px-6 py-4 font-bold transition-colors hover:bg-accent"
                 >
                   <ScrollText className="mr-2" />
-                  Orders
+                  {t("navigation.orders")}
                 </Link>
                 {user.isAdmin && (
                   <Link
@@ -296,7 +303,7 @@ const MobileMenu = () => {
                     className="flex w-full items-center justify-start gap-1 border-b px-6 py-4 font-bold transition-colors hover:bg-accent"
                   >
                     <Settings className="mr-2" />
-                    Admin Settings
+                    {t("navigation.admin-settings")}
                   </Link>
                 )}
               </div>
@@ -305,11 +312,11 @@ const MobileMenu = () => {
           <Button asChild className="mx-6 mb-3">
             {isAuth ? (
               <button onClick={handleLogout}>
-                Logout <LogOut className="ml-2 h-4 w-4" />
+                {t("auth.logout")} <LogOut className="ml-2 h-4 w-4" />
               </button>
             ) : (
               <Link to={"auth/sign-in"}>
-                Sign In <LogIn className="ml-2 h-4 w-4" />
+                {t("auth.sign-in")} <LogIn className="ml-2 h-4 w-4" />
               </Link>
             )}
           </Button>
@@ -320,6 +327,8 @@ const MobileMenu = () => {
 };
 
 const UserButton = () => {
+  const { t } = useTranslation();
+
   const [logout] = useLogoutMutation();
   const { isLoading, isAuth, user } = useAuth();
 
@@ -354,27 +363,27 @@ const UserButton = () => {
         <Link to={`/profile`}>
           <DropdownMenuItem className="cursor-pointer">
             <UserRound className="mr-2 h-4 w-4" />
-            <span>Profile</span>
+            <span>{t("navigation.profile")}</span>
           </DropdownMenuItem>
         </Link>
         <Link to={`/orders`}>
           <DropdownMenuItem className="cursor-pointer">
             <ScrollText className="mr-2 h-4 w-4" />
-            <span>Orders</span>
+            <span>{t("navigation.orders")}</span>
           </DropdownMenuItem>
         </Link>
         {user.isAdmin && (
           <Link to={`/admin/categories`}>
             <DropdownMenuItem className="cursor-pointer">
               <Settings className="mr-2 h-4 w-4" />
-              <span>Admin Settings</span>
+              <span>{t("navigation.admin-settings")}</span>
             </DropdownMenuItem>
           </Link>
         )}
         <DropdownMenuSeparator />
         <DropdownMenuItem className="cursor-pointer" onClick={() => logout()}>
           <LogOut className="mr-2 h-4 w-4" />
-          <span>Log out</span>
+          <span>{t("auth.logout")}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -398,7 +407,7 @@ export const Navbar = () => {
           <Dialog modal={false}>
             <DialogTrigger asChild>
               <Button variant="outline" className="hidden lg:flex">
-                <LayoutGrid className="mr-2" /> Categories
+                <LayoutGrid className="mr-2" /> {t("navigation.categories")}
               </Button>
             </DialogTrigger>
             <DialogContent className="top-14 max-h-[calc(100vh-3.5rem)] max-w-screen-xl translate-y-0 p-0 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-1/2">
@@ -408,7 +417,10 @@ export const Navbar = () => {
         </div>
         <div className="flex grow items-center gap-2 sm:gap-4 md:grow-0">
           <form className="grow">
-            <Input placeholder={t("search-placeholder")} name="search" />
+            <Input
+              placeholder={t("navigation.search-placeholder")}
+              name="search"
+            />
           </form>
           <div className="flex items-center">
             <Button size="icon" variant="ghost">

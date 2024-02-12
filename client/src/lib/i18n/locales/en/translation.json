@@ -1,6 +1,15 @@
 {
-  "categories": "Categories",
-  "search-placeholder": "Search...",
+  "navigation": {
+    "categories": "Categories",
+    "search-placeholder": "Search...",
+    "view-all": "View all...",
+    "all-Categories": "All Categories...",
+    "all-categories": "All categories...",
+    "cart": "Cart",
+    "profile": "Profile",
+    "orders": "Orders",
+    "admin-settings": "Admin Settings"
+  },
   "error": {
     "something-wrong": "Uh oh! Something went wrong.",
     "try-again": "Please try again."
@@ -8,6 +17,7 @@
   "auth": {
     "sign-up": "Sign Up",
     "sign-in": "Sign In",
+    "logout": "Logout",
     "have-account": "Already have an account?",
     "don't-have-account": "Don't have an account?",
     "first-name": "First Name",

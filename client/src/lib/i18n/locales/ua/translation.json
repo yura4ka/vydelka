@@ -1,6 +1,15 @@
 {
-  "categories": "Каталог",
-  "search-placeholder": "Пошук...",
+  "navigation": {
+    "categories": "Каталог",
+    "search-placeholder": "Пошук...",
+    "view-all": "Переглянути всі...",
+    "all-Categories": "Всі категорії...",
+    "all-categories": "Всі категорії...",
+    "cart": "Кошик",
+    "profile": "Акаунт",
+    "orders": "Замовлення",
+    "admin-settings": "Налаштування адміністратора"
+  },
   "error": {
     "something-wrong": "Йой! Щось пішло не так.",
     "try-again": "Будь ласка, спробуйте ще раз."
@@ -8,6 +17,7 @@
   "auth": {
     "sign-up": "Зареєструватися",
     "sign-in": "Увійти",
+    "logout": "Вийти",
     "have-account": "Вже є акаунт?",
     "don't-have-account": "Немає акаунту?",
     "first-name": "Ім'я",
