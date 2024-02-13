@@ -39,5 +39,9 @@
       "not-match": "Passwords do not match"
     },
     "email-or-phone": "Email or Phone Number"
+  },
+  "home": {
+    "popular": "Popular products",
+    "recent": "Recently bought"
   }
 }
