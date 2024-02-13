@@ -52,73 +52,91 @@ const MAX_SUB = 10;
 const Categories = () => {
   const { t } = useTranslation();
   const { data: categories } = useGetCategoryNavigationQuery();
+  const [open, setOpen] = useState(false);
 
   return (
-    <ul className="flex">
-      <div className="group/all relative min-w-fit border-r">
-        {categories?.map((c) => (
-          <li className="group/item" key={c.id}>
-            <Link
-              to={c.slug}
-              className="flex items-center justify-between gap-4 py-2 pl-4 text-sm font-medium transition-colors group-first/item:bg-accent group-hover/item:bg-accent group-hover/all:group-first/item:bg-background group-hover/all:group-[&:first-child:hover]/item:bg-accent group-has-[.last-category:hover]/all:group-first/item:bg-accent"
-            >
-              {c.title}
-              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-            </Link>
-            <ul className="absolute left-[calc(100%+1px)] top-0 hidden h-full w-max max-w-[calc(1280px-100%)] flex-col flex-wrap gap-x-8 gap-y-2 overflow-hidden bg-background px-4 py-2 pr-8 group-first/item:flex group-hover/item:flex group-hover/all:group-first/item:hidden group-hover/all:group-[&:first-child:hover]/item:flex group-has-[.last-category:hover]/all:group-first/item:flex">
-              {c.subcategories?.map((c2) => (
-                <li key={c2.id}>
-                  <Link
-                    to={c2.slug}
-                    className="font-medium transition-colors hover:text-ring"
-                  >
-                    {c2.title}
-                  </Link>
-                  <ul className={c2.subcategories ? "mt-1 border-t pt-1" : ""}>
-                    {c2.subcategories?.slice(0, MAX_SUB).map((c3) => (
-                      <li key={c3.id}>
-                        <Link
-                          to={c3.slug}
-                          className="block text-sm transition-colors hover:text-ring"
-                        >
-                          {c3.title}
-                        </Link>
-                      </li>
-                    ))}
-                    {c2.subcategories && c2.subcategories.length > MAX_SUB && (
-                      <li>
-                        <Link
-                          to={c2.slug}
-                          className="block text-sm font-medium transition-colors hover:text-ring"
-                        >
-                          {t("navigation.view-all")}
-                        </Link>
-                      </li>
-                    )}
-                  </ul>
-                </li>
-              ))}
-              <li>
+    <Dialog modal={false} open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="hidden lg:flex">
+          <LayoutGrid className="mr-2" /> {t("navigation.categories")}
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="top-14 max-h-[calc(100vh-3.5rem)] max-w-screen-xl translate-y-0 p-0 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-1/2">
+        <ul
+          className="flex"
+          onClick={(e) => {
+            if ((e.target as HTMLElement).nodeName === "A") setOpen(false);
+          }}
+        >
+          <div className="group/all relative min-w-fit border-r">
+            {categories?.map((c) => (
+              <li className="group/item" key={c.id}>
                 <Link
                   to={c.slug}
-                  className="font-medium transition-colors hover:text-ring"
+                  className="flex items-center justify-between gap-4 py-2 pl-4 text-sm font-medium transition-colors group-first/item:bg-accent group-hover/item:bg-accent group-hover/all:group-first/item:bg-background group-hover/all:group-[&:first-child:hover]/item:bg-accent group-has-[.last-category:hover]/all:group-first/item:bg-accent"
                 >
-                  {t("navigation.view-all")}
+                  {c.title}
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
                 </Link>
+                <ul className="absolute left-[calc(100%+1px)] top-0 hidden h-full w-max max-w-[calc(1280px-100%)] flex-col flex-wrap gap-x-8 gap-y-2 overflow-hidden bg-background px-4 py-2 pr-8 group-first/item:flex group-hover/item:flex group-hover/all:group-first/item:hidden group-hover/all:group-[&:first-child:hover]/item:flex group-has-[.last-category:hover]/all:group-first/item:flex">
+                  {c.subcategories?.map((c2) => (
+                    <li key={c2.id}>
+                      <Link
+                        to={c2.slug}
+                        className="font-medium transition-colors hover:text-ring"
+                      >
+                        {c2.title}
+                      </Link>
+                      <ul
+                        className={c2.subcategories ? "mt-1 border-t pt-1" : ""}
+                      >
+                        {c2.subcategories?.slice(0, MAX_SUB).map((c3) => (
+                          <li key={c3.id}>
+                            <Link
+                              to={c3.slug}
+                              className="block text-sm transition-colors hover:text-ring"
+                            >
+                              {c3.title}
+                            </Link>
+                          </li>
+                        ))}
+                        {c2.subcategories &&
+                          c2.subcategories.length > MAX_SUB && (
+                            <li>
+                              <Link
+                                to={c2.slug}
+                                className="block text-sm font-medium transition-colors hover:text-ring"
+                              >
+                                {t("navigation.view-all")}
+                              </Link>
+                            </li>
+                          )}
+                      </ul>
+                    </li>
+                  ))}
+                  <li>
+                    <Link
+                      to={c.slug}
+                      className="font-medium transition-colors hover:text-ring"
+                    >
+                      {t("navigation.view-all")}
+                    </Link>
+                  </li>
+                </ul>
               </li>
-            </ul>
-          </li>
-        ))}
-        <li className="last-category">
-          <Link
-            to="categories"
-            className="block rounded-bl-md py-2 pl-4 text-sm font-medium transition-colors hover:text-ring"
-          >
-            {t("navigation.all-Categories")}
-          </Link>
-        </li>
-      </div>
-    </ul>
+            ))}
+            <li className="last-category">
+              <Link
+                to="categories"
+                className="block rounded-bl-md py-2 pl-4 text-sm font-medium transition-colors hover:text-ring"
+              >
+                {t("navigation.all-Categories")}
+              </Link>
+            </li>
+          </div>
+        </ul>
+      </DialogContent>
+    </Dialog>
   );
 };
 
@@ -256,7 +274,7 @@ const MobileMenu = () => {
 
       <SheetContent
         side="left"
-        className="xs:w-3/4 w-full px-0 lg:hidden"
+        className="w-full px-0 xs:w-3/4 lg:hidden"
         overlayClass="lg:hidden"
       >
         <div className="flex items-center justify-between px-6">
@@ -400,25 +418,16 @@ export const Navbar = () => {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="xs:px-4 flex h-14 max-w-screen-2xl gap-4 px-2 sm:container md:justify-between">
+      <div className="flex h-14 max-w-screen-2xl gap-4 px-2 sm:container xs:px-4 md:justify-between">
         <div className="flex items-center gap-2 sm:gap-4">
           <MobileMenu />
 
-          <Link to="/" className="flex items-center gap-4 text-xl font-bold">
+          <Link to="/" className="flex items-center gap-3 text-xl font-bold">
             <Logo className="h-8 w-8" />
             <span className="hidden md:inline">VYDELKA</span>
           </Link>
 
-          <Dialog modal={false}>
-            <DialogTrigger asChild>
-              <Button variant="outline" className="hidden lg:flex">
-                <LayoutGrid className="mr-2" /> {t("navigation.categories")}
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="top-14 max-h-[calc(100vh-3.5rem)] max-w-screen-xl translate-y-0 p-0 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-1/2">
-              <Categories />
-            </DialogContent>
-          </Dialog>
+          <Categories />
         </div>
         <div className="flex grow items-center gap-2 sm:gap-4 md:grow-0">
           <form className="grow">
