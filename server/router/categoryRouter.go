@@ -14,6 +14,7 @@ func addCategoryRouter(app *fiber.App) {
 	category.Post("/", middleware.RequireAdmin, handlers.CreateCategory)
 	category.Put("/", middleware.RequireAdmin, handlers.ChangeCategory)
 	category.Get("/:category", handlers.GetCategory)
+	category.Get("/:category/route", handlers.GetCategoryRoute)
 	category.Get("/:id/filters", handlers.GetFilters)
 	category.Post("/:id/filters", middleware.RequireAdmin, handlers.CreateFilter)
 	category.Post("/:id/filters/:filterId/variants", middleware.RequireAdmin, handlers.CreateFilterVariant)

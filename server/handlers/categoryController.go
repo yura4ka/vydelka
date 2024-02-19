@@ -211,3 +211,15 @@ func GetNavigationCategories(c *fiber.Ctx) error {
 
 	return c.JSON(categories)
 }
+
+func GetCategoryRoute(c *fiber.Ctx) error {
+	category := c.Params("category")
+	lang := c.Locals("lang").(services.Language)
+
+	result, err := services.GetCategoryRoute(category, lang)
+	if err != nil {
+		return c.SendStatus(500)
+	}
+
+	return c.JSON(result)
+}
