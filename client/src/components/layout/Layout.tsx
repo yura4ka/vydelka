@@ -1,4 +1,4 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, ScrollRestoration } from "react-router-dom";
 import { Navbar } from "./Navbar";
 import { Footer } from "./Footer";
 import { useAuth } from "@/features/auth/useAuth";
@@ -12,6 +12,7 @@ export const Layout = () => {
       <Outlet />
       <Footer />
       <Toaster />
+      <ScrollRestoration />
     </div>
   );
 };
