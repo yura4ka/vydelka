@@ -2,6 +2,7 @@ import { api } from "@/app/api/apiSlice";
 import { Language, Translation } from "../translations";
 import i18next from "i18next";
 import { WithId } from "@/lib/utils";
+import { BreadcrumbRoute } from "@/components/Breadcrumb";
 
 export type Category = {
   id: string;
@@ -62,6 +63,8 @@ export type DeleteFilterVariant = WithId<Omit<NewFilterVariant, "variant">>;
 export type CategoryNavigation = Category & {
   subcategories?: CategoryNavigation[];
 };
+
+export type CategoryRoute = BreadcrumbRoute;
 
 export const categoryApi = api.injectEndpoints({
   endpoints: (builder) => ({
@@ -335,6 +338,10 @@ export const categoryApi = api.injectEndpoints({
       query: (category) => ({ url: `category/${category}` }),
       providesTags: ["CategoryInfo"],
     }),
+
+    getCategoryRoute: builder.query<CategoryRoute[], string>({
+      query: (category) => ({ url: `category/${category}/route` }),
+    }),
   }),
 });
 
@@ -352,4 +359,5 @@ export const {
   useDeleteFilterVariantMutation,
   useGetCategoryNavigationQuery,
   useGetCategoryBySlugQuery,
+  useGetCategoryRouteQuery,
 } = categoryApi;

@@ -8,7 +8,8 @@
     "cart": "Cart",
     "profile": "Profile",
     "orders": "Orders",
-    "admin-settings": "Admin Settings"
+    "admin-settings": "Admin Settings",
+    "home": "Home"
   },
   "error": {
     "something-wrong": "Uh oh! Something went wrong.",
