@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"log"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/yura4ka/vydelka/services"
 )
@@ -76,4 +78,17 @@ func DeleteProduct(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"message": "Ok",
 	})
+}
+
+func GetPopularProducts(c *fiber.Ctx) error {
+	category := c.Query("category")
+	lang := c.Locals("lang").(services.Language)
+
+	result, err := services.GetPopularProducts(category, lang)
+	if err != nil {
+		log.Print(err)
+		return c.SendStatus(500)
+	}
+
+	return c.JSON(result)
 }

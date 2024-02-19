@@ -111,6 +111,9 @@ type Product struct {
 	DescriptionTranslations *Translations    `json:"descriptionTranslations,omitempty"`
 	Images                  []ProductImage   `json:"images"`
 	Filters                 [][2]interface{} `json:"filters"`
+	Rating                  float64          `json:"rating"`
+	Reviews                 uint64           `json:"reviews"`
+	Popularity              uint64           `json:"-"`
 }
 
 type productTranslation struct {
@@ -153,7 +156,9 @@ func GetProducts(request *ProductsRequest) ([]Product, error) {
 				) as translations
 			{{else}}
 				pt.title, pt.description
-			{{end}}
+			{{end}},
+			COALESCE(AVG(r.rating), 0) AS rating,
+			COUNT(r.*) AS reviews
 		FROM products AS p
 		LEFT JOIN product_translations AS pt ON p.id = pt.product_id
 		{{if not .WithTranslations}}
@@ -164,6 +169,7 @@ func GetProducts(request *ProductsRequest) ([]Product, error) {
 		LEFT JOIN filter_variants AS fv ON pf.variant_id = fv.id
 		LEFT JOIN translation_items AS fti ON fv.variant_translation_item = fti.id
 		LEFT JOIN translations AS ft ON fti.id = ft.item_id AND ft.lang = $1
+		LEFT JOIN reviews AS r ON p.id = r.product_id
 		WHERE p.category_id = $2
 		GROUP BY p.id
 		{{if not .WithTranslations}}
@@ -192,8 +198,9 @@ func GetProducts(request *ProductsRequest) ([]Product, error) {
 			result[i].DescriptionTranslations = &Translations{en.Description, ua.Description}
 		}
 		for _, f := range v.Filters {
+			var variant string = f.Variant
 			result[i].Filters = append(result[i].Filters,
-				[2]interface{}{f.FilterId, FilterVariant{f.Id, f.Slug, &f.Variant, nil}})
+				[2]interface{}{f.FilterId, FilterVariant{f.Id, f.Slug, &variant, nil}})
 		}
 	}
 
@@ -292,4 +299,51 @@ func DeleteProduct(id string) error {
 		DELETE FROM products WHERE id = $1;
 	`, id)
 	return err
+}
+
+func GetPopularProducts(category string, lang Language) ([]Product, error) {
+	tmpl := template.Must(template.New("popularProductsQuery").Parse(`
+		WITH RECURSIVE CategoryHierarchy AS (
+			SELECT c.id, c.parent_id
+			FROM categories AS c
+			{{if .}}
+				WHERE c.slug = $2
+			{{else}}
+				WHERE c.parent_id IS NULL
+			{{end}}
+
+			UNION ALL
+
+			SELECT c.id, c.parent_id
+			FROM categories AS c
+			JOIN CategoryHierarchy AS ch ON c.parent_id = ch.id
+		)
+
+		SELECT p.id, p.slug, p.price, pt.title, pt.description,
+			json_agg(DISTINCT jsonb_build_object(
+				'id', pi.id, 'imageUrl', pi.image_url, 'width', pi.width, 'height', pi.height
+			)) AS images,
+			COALESCE(SUM(o.quantity), 0) AS popularity,
+			COALESCE(AVG(r.rating), 0) AS rating,
+			COUNT(r.*) AS reviews
+		FROM products AS p
+		JOIN CategoryHierarchy AS c ON p.category_id = c.id
+		LEFT JOIN product_translations AS pt ON p.id = pt.product_id AND pt.lang = $1
+		LEFT JOIN product_images AS pi ON p.id = pi.product_id
+		LEFT JOIN order_content AS o ON p.id = o.product_id
+		LEFT JOIN reviews AS r ON p.id = r.product_id
+		GROUP BY p.id, pt.title, pt.description
+		ORDER BY popularity DESC, rating DESC
+		LIMIT 12;
+	`))
+
+	result := make([]Product, 0)
+	query := ExecuteTemplate(tmpl, category)
+	args := []interface{}{lang}
+	if category != "" {
+		args = append(args, category)
+	}
+
+	err := pgxscan.Select(db.Ctx, db.Client, &result, query, args...)
+	return result, err
 }
