@@ -441,15 +441,16 @@ type NavigationCategory struct {
 	Subcategories []*NavigationCategory `json:"subcategories,omitempty"`
 }
 
-func GetNavigationCategories(lang Language, parentId string) ([]*NavigationCategory, error) {
+func GetNavigationCategories(lang Language, parent string) ([]*NavigationCategory, error) {
 	tmpl := template.Must(template.New("navigationQuery").Parse(`
 		WITH RECURSIVE category_hierarchy AS (
-			SELECT *, 0 AS level
-    	FROM categories
+			SELECT c.*, 0 AS level
+    	FROM categories AS c
 			{{if .}}
-				WHERE parent_id = $2
+				INNER JOIN categories AS parent 
+				ON c.parent_id = parent.id AND parent.slug = $2
 			{{else}}
-				WHERE parent_id IS NULL
+				WHERE c.parent_id IS NULL
 			{{end}}
 
 			UNION ALL
@@ -466,10 +467,10 @@ func GetNavigationCategories(lang Language, parentId string) ([]*NavigationCateg
 		ORDER BY level;
 	`))
 
-	query := ExecuteTemplate(tmpl, parentId)
+	query := ExecuteTemplate(tmpl, parent)
 	args := []any{lang}
-	if parentId != "" {
-		args = append(args, parentId)
+	if parent != "" {
+		args = append(args, parent)
 	}
 
 	rows, err := db.Client.Query(db.Ctx, query, args...)
@@ -492,8 +493,12 @@ func GetNavigationCategories(lang Language, parentId string) ([]*NavigationCateg
 		if c.ParentId == nil {
 			result = append(result, &c)
 		} else {
-			parent := categoryMap[*c.ParentId]
-			parent.Subcategories = append(parent.Subcategories, &c)
+			parent, ok := categoryMap[*c.ParentId]
+			if !ok {
+				result = append(result, &c)
+			} else {
+				parent.Subcategories = append(parent.Subcategories, &c)
+			}
 		}
 	}
 

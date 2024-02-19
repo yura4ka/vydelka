@@ -324,7 +324,10 @@ export const categoryApi = api.injectEndpoints({
     }),
 
     getCategoryNavigation: builder.query<CategoryNavigation[], string | void>({
-      query: (id) => ({ url: `category/navigation`, params: { id } }),
+      query: (category) => ({
+        url: `category/navigation`,
+        params: { category },
+      }),
       providesTags: ["CategoryNavigation"],
     }),
   }),

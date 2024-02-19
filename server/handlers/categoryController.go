@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"log"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/yura4ka/vydelka/services"
 )
@@ -84,7 +82,6 @@ func GetFilters(c *fiber.Ctx) error {
 
 	filters, err := services.GetFilters(id, withTranslations, lang)
 	if err != nil {
-		log.Print(err)
 		return c.SendStatus(500)
 	}
 
@@ -196,10 +193,10 @@ func DeleteFilterVariant(c *fiber.Ctx) error {
 }
 
 func GetNavigationCategories(c *fiber.Ctx) error {
-	id := c.Query("id")
+	category := c.Query("category")
 	lang := c.Locals("lang").(services.Language)
 
-	categories, err := services.GetNavigationCategories(lang, id)
+	categories, err := services.GetNavigationCategories(lang, category)
 	if err != nil {
 		return c.SendStatus(500)
 	}
