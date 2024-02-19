@@ -12,7 +12,7 @@ export const Layout = () => {
       <Outlet />
       <Footer />
       <Toaster />
-      <ScrollRestoration />
+      <ScrollRestoration getKey={(location) => location.pathname} />
     </div>
   );
 };

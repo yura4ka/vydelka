@@ -37,3 +37,5 @@ export function formatMoney(kop: number) {
     trailingZeroDisplay: "stripIfInteger",
   }).format(uah);
 }
+
+export const RESTRICTED_FILTERS = ["page", "orderBy"];

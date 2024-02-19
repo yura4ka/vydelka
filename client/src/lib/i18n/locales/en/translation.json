@@ -44,5 +44,9 @@
   "home": {
     "popular": "Popular products",
     "recent": "Recently bought"
+  },
+  "product": {
+    "filters": "Filters",
+    "clear-all": "Clear All"
   }
 }
