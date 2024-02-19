@@ -31,6 +31,8 @@ export type Product = {
   price: number;
   filters: Map<string, ProductFilterVariant>;
   images: ProductImage[];
+  rating: number;
+  reviews: number;
 };
 
 export type NewProduct = {
@@ -112,6 +114,24 @@ export const productApi = api.injectEndpoints({
         { type: "Products", id: args },
       ],
     }),
+
+    getPopularProducts: builder.query<Product[], string | void>({
+      query: (category) => ({ url: `product/popular`, params: { category } }),
+      transformResponse: (
+        response: ProductsResponseNonTransformed["products"],
+      ) => response.map((p) => ({ ...p, filters: new Map() })),
+      providesTags: (result, _, category) =>
+        result
+          ? [
+              ...result.map((p) => ({
+                type: "Products" as const,
+                id: p.id,
+                category,
+              })),
+              { type: "Products", id: "LIST", category },
+            ]
+          : [{ type: "Products", id: "LIST", category }],
+    }),
   }),
 });
 
@@ -120,4 +140,5 @@ export const {
   useGetProductsQuery,
   useChangeProductMutation,
   useDeleteProductMutation,
+  useGetPopularProductsQuery,
 } = productApi;

@@ -267,7 +267,11 @@ const MobileMenu = () => {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="lg:hidden">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="justify-normal lg:hidden"
+        >
           <Menu />
         </Button>
       </SheetTrigger>
@@ -418,8 +422,8 @@ export const Navbar = () => {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="flex h-14 max-w-screen-2xl gap-4 px-2 sm:container xs:px-4 md:justify-between">
-        <div className="flex items-center gap-2 sm:gap-4">
+      <div className="flex h-14 gap-4 px-2 sm:container xs:px-4 sm:max-w-screen-2xl md:justify-between">
+        <div className="flex items-center gap-1 md:gap-4">
           <MobileMenu />
 
           <Link to="/" className="flex items-center gap-3 text-xl font-bold">

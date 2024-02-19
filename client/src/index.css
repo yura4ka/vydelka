@@ -79,7 +79,7 @@
 
 @layer utilities {
   .scrollbar::-webkit-scrollbar {
-    @apply w-2 rounded bg-transparent;
+    @apply h-2 w-2 rounded bg-transparent;
   }
 
   .scrollbar::-webkit-scrollbar-thumb {
