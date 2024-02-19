@@ -109,7 +109,7 @@ const ProductsTable: React.FC<ProductsTableProps> = ({
   const { i18n } = useTranslation();
   const lang = (i18n.resolvedLanguage ?? "en") as Language;
 
-  const [params, setParams] = useSearchParams();
+  const [params] = useSearchParams();
   const page = Number(params.get("page")) || 1;
 
   const [productModal, setProductModal] = useState<{
@@ -118,12 +118,6 @@ const ProductsTable: React.FC<ProductsTableProps> = ({
   }>(() => ({
     isOpen: false,
   }));
-
-  const changePage = (page: number) => {
-    const searchParams = new URLSearchParams(params);
-    searchParams.set("page", page.toString());
-    setParams(searchParams);
-  };
 
   return (
     <>
@@ -194,11 +188,7 @@ const ProductsTable: React.FC<ProductsTableProps> = ({
           ))}
         </TableBody>
       </Table>
-      <Pagination
-        page={page}
-        totalPages={data?.totalPages ?? 1}
-        onChange={changePage}
-      />
+      <Pagination page={page} totalPages={data?.totalPages ?? 1} />
       <ProductForm
         isOpen={productModal.isOpen}
         setOpen={(open) => setProductModal({ isOpen: open })}
