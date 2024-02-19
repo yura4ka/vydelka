@@ -1,6 +1,6 @@
 import { useAuth } from "@/features/auth/useAuth";
 import { Loader2 } from "lucide-react";
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 
 type Props = {
   requireAdmin?: boolean;
@@ -8,6 +8,7 @@ type Props = {
 
 export const AuthLayout: React.FC<Props> = ({ requireAdmin }) => {
   const { isAuth, isLoading, user } = useAuth();
+  const location = useLocation();
 
   if (isLoading) {
     return (
@@ -25,5 +26,5 @@ export const AuthLayout: React.FC<Props> = ({ requireAdmin }) => {
     return <Navigate to="/" replace />;
   }
 
-  return <Outlet />;
+  return <Outlet key={location.key} />;
 };

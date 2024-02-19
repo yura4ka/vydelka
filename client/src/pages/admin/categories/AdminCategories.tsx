@@ -1,4 +1,4 @@
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import {
   Table,
   TableBody,
@@ -66,7 +66,7 @@ const CategoriesTable: React.FC<CategoriesTableProps> = ({
             <TableRow key={c.id}>
               <TableCell>
                 <Link
-                  to={`?id=${c.id}`}
+                  to={`/admin/categories/${c.id}`}
                   className="font-semibold hover:underline"
                 >
                   {c.title}
@@ -202,9 +202,9 @@ const ProductsTable: React.FC<ProductsTableProps> = ({
 };
 
 export const AdminCategories = () => {
-  const [params] = useSearchParams();
-  const id = params.get("id") ?? undefined;
-  const page = Number(params.get("page")) || 1;
+  const [searchParams] = useSearchParams();
+  const { id } = useParams();
+  const page = Number(searchParams.get("page")) || 1;
 
   const { data: categories, isFetching: isCategoriesLoading } =
     useGetCategoriesQuery(id);

@@ -23,7 +23,7 @@ const router = createBrowserRouter([
       {
         path: "admin",
         element: <AuthLayout requireAdmin />,
-        children: [{ path: "categories", element: <AdminCategories /> }],
+        children: [{ path: "categories/:id?", element: <AdminCategories /> }],
       },
     ],
   },
