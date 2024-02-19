@@ -330,6 +330,11 @@ export const categoryApi = api.injectEndpoints({
       }),
       providesTags: ["CategoryNavigation"],
     }),
+
+    getCategoryBySlug: builder.query<Category, string>({
+      query: (category) => ({ url: `category/${category}` }),
+      providesTags: ["CategoryInfo"],
+    }),
   }),
 });
 
@@ -346,4 +351,5 @@ export const {
   useDeleteFilterMutation,
   useDeleteFilterVariantMutation,
   useGetCategoryNavigationQuery,
+  useGetCategoryBySlugQuery,
 } = categoryApi;

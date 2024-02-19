@@ -40,20 +40,28 @@ func CreateCategory(c *fiber.Ctx) error {
 	})
 }
 
-func GetCategoryById(c *fiber.Ctx) error {
-	id := c.Params("id")
-	category, err := services.GetCategoryById(id)
+func GetCategory(c *fiber.Ctx) error {
+	category := c.Params("category")
+	lang := c.Locals("lang").(services.Language)
+	var result interface{}
+	var err error
+
+	if services.ValidateVar(category, "uuid") == nil {
+		result, err = services.GetCategoryById(category)
+	} else {
+		result, err = services.GetCategoryBySlug(category, lang)
+	}
+
 	if err != nil {
-		log.Print(err)
 		return c.SendStatus(500)
 	}
-	if category == nil {
+	if result == nil {
 		return &fiber.Error{
 			Code:    400,
 			Message: "Category not found",
 		}
 	}
-	return c.JSON(category)
+	return c.JSON(result)
 }
 
 func ChangeCategory(c *fiber.Ctx) error {

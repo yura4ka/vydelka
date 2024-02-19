@@ -504,3 +504,15 @@ func GetNavigationCategories(lang Language, parent string) ([]*NavigationCategor
 
 	return result, nil
 }
+
+func GetCategoryBySlug(slug string, lang Language) (*Category, error) {
+	var category Category
+	err := pgxscan.Get(db.Ctx, db.Client, &category, `
+		SELECT c.id, c.created_at, c.slug, c.parent_id, c.image_url, t.content AS title
+		FROM categories AS c
+		LEFT JOIN translation_items AS ti ON c.title_translation_item = ti.id
+		LEFT JOIN translations AS t ON ti.id = t.item_id AND t.lang = $1
+		WHERE c.slug = $2;
+	`, lang, slug)
+	return &category, err
+}
