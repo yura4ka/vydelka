@@ -37,6 +37,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { useDebounce } from "@/hooks";
 
 type CategoriesProps = {
   categories: CategoryNavigation[] | undefined;
@@ -276,6 +277,7 @@ export const CategoryPage = () => {
   const { t } = useTranslation();
   const { slug } = useParams();
   const [searchParams] = useSearchParams();
+  const debouncedParams = useDebounce(searchParams.toString(), 550);
 
   const { data: routes } = useGetCategoryRouteQuery(slug ?? "", {
     skip: !slug,
@@ -291,7 +293,7 @@ export const CategoryPage = () => {
     isFetching: isProductsFetching,
     isLoading: isProductLoading,
   } = useGetProductsQuery(
-    { categoryId: data?.id ?? "", filters: searchParams.toString() },
+    { categoryId: data?.id ?? "", filters: debouncedParams },
     { skip: !data || categories?.length !== 0 },
   );
   const { data: popular } = useGetPopularProductsQuery(slug, {
