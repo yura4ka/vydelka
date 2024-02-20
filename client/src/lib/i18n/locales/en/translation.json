@@ -47,6 +47,7 @@
   },
   "product": {
     "filters": "Filters",
-    "clear-all": "Clear All"
+    "clear-all": "Clear All",
+    "not-found": "No products found..."
   }
 }

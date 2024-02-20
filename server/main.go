@@ -43,6 +43,7 @@ func main() {
 
 	db.Connect()
 	router.SetupRouter(app)
+	services.SetupValidator()
 
 	port := os.Getenv("PORT")
 	if port == "" {

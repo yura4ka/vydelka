@@ -139,10 +139,46 @@ type ProductsRequest struct {
 	WithTranslations bool
 	Lang             Language
 	Page             int
+	Filters          map[string][]string
+	Cnt              int
+}
+
+func createFiltersQuery(filters map[string][]string) (string, []any) {
+	args := make([]any, 0)
+	argsCnt := 0
+
+	values := make([]string, 0, len(filters))
+	for k, v := range filters {
+		values = append(values, fmt.Sprintf("$%v, $%v::varchar[]", argsCnt+1, argsCnt+2))
+		args = append(args, k, v)
+		argsCnt += 2
+	}
+
+	queryFilters := `
+		WITH query_filters (filter, variants) AS (
+			SELECT ` + strings.Join(values, " UNION ALL SELECT ") +
+		`),
+			
+		filtered_products AS (
+			SELECT p.*
+			FROM products AS P
+			JOIN product_filters AS pf ON p.id = pf.product_id
+			JOIN filter_variants AS fv ON pf.variant_id = fv.id
+			JOIN filters AS f ON fv.filter_id = f.id
+			JOIN query_filters AS qf ON f.slug = qf.filter AND fv.slug = ANY(qf.variants)
+			GROUP BY p.id
+			HAVING COUNT(*) = (SELECT COUNT(*) FROM query_filters)
+		)`
+	return queryFilters, args
 }
 
 func GetProducts(request *ProductsRequest) ([]Product, error) {
-	tmpl := template.Must(template.New("productsQuery").Parse(`
+	tmpl := template.Must(template.New("productsQuery").Funcs(template.FuncMap{
+		"inc": func(n int) int {
+			return n + 1
+		},
+	}).Parse(`
+		{{$arg_counter:=.Cnt}}
 		SELECT p.id, p.slug, p.price,
 			json_agg(DISTINCT jsonb_build_object(
 				'id', pi.id, 'imageUrl', pi.image_url, 'width', pi.width, 'height', pi.height
@@ -159,30 +195,49 @@ func GetProducts(request *ProductsRequest) ([]Product, error) {
 			{{end}},
 			COALESCE(AVG(r.rating), 0) AS rating,
 			COUNT(r.*) AS reviews
-		FROM products AS p
+		{{if .Filters}}
+			FROM filtered_products AS p
+		{{else}}
+			FROM products AS p
+		{{end}}
 		LEFT JOIN product_translations AS pt ON p.id = pt.product_id
 		{{if not .WithTranslations}}
-			AND pt.lang = $1
+			AND pt.lang = ${{$arg_counter}}
 		{{end}}
 		LEFT JOIN product_images AS pi ON p.id = pi.product_id
 		LEFT JOIN product_filters AS pf ON p.id = pf.product_id
 		LEFT JOIN filter_variants AS fv ON pf.variant_id = fv.id
 		LEFT JOIN translation_items AS fti ON fv.variant_translation_item = fti.id
-		LEFT JOIN translations AS ft ON fti.id = ft.item_id AND ft.lang = $1
+		LEFT JOIN translations AS ft ON fti.id = ft.item_id AND ft.lang = ${{$arg_counter}}
+		{{$arg_counter = inc $arg_counter}}
 		LEFT JOIN reviews AS r ON p.id = r.product_id
-		WHERE p.category_id = $2
+		WHERE p.category_id = ${{$arg_counter}}
+		{{$arg_counter = inc $arg_counter}}
 		GROUP BY p.id
+		{{if .Filters}}
+			, p.slug, p.price
+		{{end}}
 		{{if not .WithTranslations}}
 			, pt.title, pt.description
 		{{end}}
-		LIMIT $3 OFFSET $4;
+		LIMIT ${{$arg_counter}}
+		{{$arg_counter = inc $arg_counter}}
+		OFFSET ${{$arg_counter}};
 	`))
 
-	query := ExecuteTemplate(tmpl, request)
-	offset := (request.Page - 1) * PRODUCTS_PER_PAGE
+	args := make([]any, 0)
+	filtersQuery := ""
+	if len(request.Filters) != 0 {
+		filtersQuery, args = createFiltersQuery(request.Filters)
+	}
 
+	request.Cnt = len(args) + 1
+	offset := (request.Page - 1) * PRODUCTS_PER_PAGE
+	args = append(args, request.Lang, request.CategoryId, PRODUCTS_PER_PAGE, offset)
+
+	query := filtersQuery + ExecuteTemplate(tmpl, request)
 	products := make([]dbProduct, 0)
-	err := pgxscan.Select(db.Ctx, db.Client, &products, query, request.Lang, request.CategoryId, PRODUCTS_PER_PAGE, offset)
+	err := pgxscan.Select(db.Ctx, db.Client, &products, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -210,14 +265,26 @@ func GetProducts(request *ProductsRequest) ([]Product, error) {
 func HasMoreProducts(request *ProductsRequest) (bool, int, error) {
 	tmpl := template.Must(template.New("productsTotalQuery").Parse(`
 		SELECT COUNT(*) 
-		FROM products AS p
-		WHERE p.category_id = $1;
+		{{if .Filters}}
+			FROM filtered_products AS p
+		{{else}}
+			FROM products AS p
+		{{end}}
+		WHERE p.category_id = ${{.Cnt}};
 	`))
 
-	query := ExecuteTemplate(tmpl, request)
+	args := make([]any, 0)
+	filtersQuery := ""
+	if len(request.Filters) != 0 {
+		filtersQuery, args = createFiltersQuery(request.Filters)
+	}
+
+	request.Cnt = len(args) + 1
+	args = append(args, request.CategoryId)
+	query := filtersQuery + ExecuteTemplate(tmpl, request)
 
 	var total int
-	err := pgxscan.Get(db.Ctx, db.Client, &total, query, request.CategoryId)
+	err := pgxscan.Get(db.Ctx, db.Client, &total, query, args...)
 	if err != nil {
 		return false, 0, err
 	}

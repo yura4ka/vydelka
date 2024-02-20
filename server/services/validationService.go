@@ -23,6 +23,8 @@ type (
 	}
 )
 
+var FORBIDDEN_FILTERS = []string{"categoryId", "withTranslations", "page", "orderBy"}
+
 var validate = validator.New()
 var conform = modifiers.New()
 
@@ -80,4 +82,10 @@ func ValidateJSON(c *fiber.Ctx, input interface{}) *fiber.Error {
 func ValidateVar(field interface{}, tag string) error {
 	conform.Field(context.Background(), field, tag)
 	return validate.Var(field, tag)
+}
+
+func SetupValidator() {
+	validate.RegisterValidation("filter", func(fl validator.FieldLevel) bool {
+		return !SliceContains(FORBIDDEN_FILTERS, fl.Field().String())
+	})
 }

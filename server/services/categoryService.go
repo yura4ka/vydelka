@@ -268,7 +268,7 @@ func GetFilters(categoryId string, withTranslations bool, lang Language) ([]*Fil
 
 type NewFilter struct {
 	Title Translations `json:"title" validate:"required"`
-	Slug  string       `json:"slug" validate:"required" mod:"trim"`
+	Slug  string       `json:"slug" validate:"required,filter" mod:"trim"`
 }
 
 func CreateFilter(categoryId string, f *NewFilter) (string, error) {

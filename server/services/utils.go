@@ -59,3 +59,12 @@ func CreateLoginResponse(user *User, token string, ucareToken *UcareToken) Login
 		ucareToken,
 	}
 }
+
+func SliceContains[T comparable](arr []T, value T) bool {
+	for _, v := range arr {
+		if v == value {
+			return true
+		}
+	}
+	return false
+}

@@ -148,8 +148,6 @@ const ProductSection: React.FC<ProductSectionProps> = ({
     setSearchParams(nextParams);
   };
 
-  if (data.products.length === 0) return null;
-
   const filtersJsx = filters?.map((f) => (
     <div key={f.id}>
       <h3 className="pb-2 font-medium">{f.title}</h3>
@@ -258,14 +256,16 @@ const ProductSection: React.FC<ProductSectionProps> = ({
             </li>
           ))}
         </ul>
-        <div
-          className={cn(
-            "flex justify-center opacity-0 transition-opacity",
-            isFetching && "opacity-100",
-          )}
-        >
-          <Loader2 className="h-8 w-8 animate-spin" />
-        </div>
+        {data.products.length === 0 && (
+          <p className="text-center text-xl text-muted-foreground">
+            {t("product.not-found")}
+          </p>
+        )}
+        {isFetching && (
+          <div className="absolute -top-4 z-[3] flex h-full w-full justify-center bg-black/75">
+            <Loader2 className="fixed top-1/2 h-8 w-8 animate-spin" />
+          </div>
+        )}
         <Pagination page={1} totalPages={data.totalPages} />
       </section>
     </div>
@@ -276,7 +276,6 @@ export const CategoryPage = () => {
   const { t } = useTranslation();
   const { slug } = useParams();
   const [searchParams] = useSearchParams();
-  const page = +(searchParams.get("page") ?? 1);
 
   const { data: routes } = useGetCategoryRouteQuery(slug ?? "", {
     skip: !slug,
@@ -292,7 +291,7 @@ export const CategoryPage = () => {
     isFetching: isProductsFetching,
     isLoading: isProductLoading,
   } = useGetProductsQuery(
-    { categoryId: data?.id ?? "", page },
+    { categoryId: data?.id ?? "", filters: searchParams.toString() },
     { skip: !data || categories?.length !== 0 },
   );
   const { data: popular } = useGetPopularProductsQuery(slug, {

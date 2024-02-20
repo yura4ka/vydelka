@@ -2,21 +2,31 @@ package handlers
 
 import (
 	"log"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/yura4ka/vydelka/services"
 )
 
 func GetProducts(c *fiber.Ctx) error {
+	filters := make(map[string][]string)
+	for k, v := range c.Queries() {
+		if !services.SliceContains(services.FORBIDDEN_FILTERS, k) {
+			filters[k] = strings.Split(v, " ")
+		}
+	}
+
 	request := &services.ProductsRequest{
 		CategoryId:       c.Query("categoryId"),
 		WithTranslations: c.QueryBool("withTranslations"),
 		Page:             c.QueryInt("page", 1),
 		Lang:             c.Locals("lang").(services.Language),
+		Filters:          filters,
 	}
 
 	products, err := services.GetProducts(request)
 	if err != nil {
+		log.Print(err)
 		return c.SendStatus(500)
 	}
 
