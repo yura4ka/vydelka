@@ -33,6 +33,7 @@ const CategoriesSection = () => {
                   height={75}
                   alt={c.title}
                   title={c.title}
+                  loading="lazy"
                 />
                 <h3 className="line-clamp-2 text-center text-sm font-medium leading-tight tracking-tight">
                   {c.title}

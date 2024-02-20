@@ -35,12 +35,14 @@ export const ProductCard: React.FC<Props> = ({
           src={`${product.images[0].imageUrl}-/preview/250x250/-/progressive/yes/`}
           alt={product.title}
           title={product.title}
+          loading="lazy"
           className="absolute left-1/2 top-1/2 max-h-full max-w-full -translate-x-1/2 -translate-y-1/2 group-hover/img:hidden"
         />
         <img
           src={`${(product.images[1] ?? product.images[0]).imageUrl}-/preview/250x250/-/progressive/yes/`}
           alt={product.title}
           title={product.title}
+          loading="lazy"
           className="absolute left-1/2 top-1/2 hidden max-h-full max-w-full -translate-x-1/2 -translate-y-1/2 group-hover/img:block"
         />
       </Link>

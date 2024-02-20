@@ -47,7 +47,7 @@ const Categories: React.FC<CategoriesProps> = ({ categories }) => {
 
   return (
     <section>
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(190px,1fr))] gap-4 md:gap-x-8">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(190px,1fr))] gap-4 md:gap-x-8">
         {sorted?.map((c) => (
           <div key={c.id} className="flex flex-col gap-2">
             <Link
@@ -59,6 +59,7 @@ const Categories: React.FC<CategoriesProps> = ({ categories }) => {
                 src={`${c.imageUrl}-/scale_crop/250x250/center/-/progressive/yes/`}
                 alt={c.title}
                 title={c.title}
+                loading="lazy"
               />
               <h3
                 className={cn(
