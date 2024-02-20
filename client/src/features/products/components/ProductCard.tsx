@@ -29,7 +29,7 @@ export const ProductCard: React.FC<Props> = ({
     >
       <Link
         to={`/p/${product.slug}`}
-        className="group/img relative block py-[50%]"
+        className="group/img peer relative block py-[50%]"
       >
         <img
           src={`${product.images[0].imageUrl}-/preview/250x250/-/progressive/yes/`}
@@ -46,7 +46,10 @@ export const ProductCard: React.FC<Props> = ({
       </Link>
       <Link
         to={`/p/${product.slug}`}
-        className="line-clamp-2 min-w-0 text-sm leading-tight"
+        className={cn(
+          "line-clamp-2 min-w-0 text-sm leading-tight transition-colors",
+          !product.filters.size && "hover:text-primary peer-hover:text-primary",
+        )}
       >
         {product.title}
       </Link>
@@ -63,14 +66,16 @@ export const ProductCard: React.FC<Props> = ({
           <ShoppingCart className="size-5 xs:size-6" />
         </Button>
       </div>
-      <dl className="absolute left-0 hidden w-full bg-background text-xs after:absolute after:-bottom-2 after:-left-2 after:-right-2 after:top-0 after:-z-[1] after:block after:bg-background after:shadow-[0_4px_4px_0,4px_4px_4px_0,-4px_4px_4px_0] after:shadow-border sm:group-hover/product:block">
-        {filters?.map((f) => (
-          <div key={f.id} className="line-clamp-1">
-            <span className="pr-1 text-muted-foreground">{f.title}:</span>
-            <span>{product.filters.get(f.id)?.variant}</span>
-          </div>
-        ))}
-      </dl>
+      {product.filters.size !== 0 && (
+        <dl className="absolute left-0 hidden w-full bg-background text-xs after:absolute after:-bottom-2 after:-left-2 after:-right-2 after:top-0 after:-z-[1] after:block after:bg-background after:shadow-[0_4px_4px_0,4px_4px_4px_0,-4px_4px_4px_0] after:shadow-border sm:group-hover/product:block">
+          {filters?.map((f) => (
+            <div key={f.id} className="line-clamp-1">
+              <span className="pr-1 text-muted-foreground">{f.title}:</span>
+              <span>{product.filters.get(f.id)?.variant}</span>
+            </div>
+          ))}
+        </dl>
+      )}
     </div>
   );
 };
