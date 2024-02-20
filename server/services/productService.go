@@ -424,3 +424,55 @@ func GetPopularProducts(category string, lang Language) ([]Product, error) {
 	err := pgxscan.Select(db.Ctx, db.Client, &result, query, args...)
 	return result, err
 }
+
+func GetProductBySlug(slug string, lang Language) (*Product, error) {
+	var product Product
+	err := pgxscan.Get(db.Ctx, db.Client, &product, `
+		SELECT p.id, p.slug, p.price, pt.title, pt.description,
+		json_agg(DISTINCT jsonb_build_object(
+			'id', pi.id, 'imageUrl', pi.image_url, 'width', pi.width, 'height', pi.height
+		)) AS images,
+		json_agg(DISTINCT jsonb_build_array(
+			jsonb_build_object('id', f.id, 'slug', f.slug, 'title', ft.content), 
+			jsonb_build_object('id', fv.id, 'slug', fv.slug, 'variant', vt.content)
+		)) AS filters,
+		COALESCE(AVG(r.rating), 0) AS rating,
+		COUNT(r.*) AS reviews
+		FROM products AS p
+		LEFT JOIN product_translations AS pt ON p.id = pt.product_id AND pt.lang = $1
+		LEFT JOIN product_images AS pi ON p.id = pi.product_id
+		LEFT JOIN product_filters AS pf ON p.id = pf.product_id
+		LEFT JOIN filter_variants AS fv ON pf.variant_id = fv.id
+		LEFT JOIN filters AS f ON fv.filter_id = f.id
+		LEFT JOIN translation_items AS vti ON fv.variant_translation_item = vti.id
+		LEFT JOIN translations AS vt ON vti.id = vt.item_id AND vt.lang = $1
+		LEFT JOIN translation_items AS fti ON f.title_translation_item = fti.id
+		LEFT JOIN translations AS ft ON fti.id = ft.item_id AND ft.lang = $1
+		LEFT JOIN reviews AS r ON p.id = r.product_id
+		WHERE p.slug = $2
+		GROUP BY p.id, pt.title, pt.description;
+	`, lang, slug)
+	if pgxscan.NotFound(err) {
+		return nil, nil
+	}
+	return &product, err
+}
+
+func GetProductRoute(slug string, lang Language) ([]CategoryRoute, error) {
+	var product struct{ Title, Category string }
+	err := pgxscan.Get(db.Ctx, db.Client, &product, `
+		SELECT pt.title, c.slug as category 
+		FROM products AS p
+		LEFT JOIN product_translations AS pt ON p.id = pt.product_id AND lang = $1
+		LEFT JOIN categories AS c ON p.category_id = c.id
+		WHERE p.slug = $2
+	`, lang, slug)
+	if err != nil {
+		return nil, err
+	}
+
+	result, err := GetCategoryRoute(product.Category, lang)
+	result = append(result, CategoryRoute{"", ""})
+
+	return result, err
+}

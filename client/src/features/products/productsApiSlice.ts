@@ -1,6 +1,7 @@
 import { api } from "@/app/api/apiSlice";
 import { Translation } from "../translations";
 import { WithId } from "@/lib/utils";
+import { BreadcrumbRoute } from "@/components/Breadcrumb";
 
 export type ProductImage = {
   id: string;
@@ -21,7 +22,7 @@ export type ProductFilterVariant = {
   variant: string;
 };
 
-export type Product = {
+export type Product<FilterType = string> = {
   id: string;
   title: string;
   description: string;
@@ -29,7 +30,7 @@ export type Product = {
   descriptionTranslations: Translation;
   slug: string;
   price: number;
-  filters: Map<string, ProductFilterVariant>;
+  filters: Map<FilterType, ProductFilterVariant>;
   images: ProductImage[];
   rating: number;
   reviews: number;
@@ -63,6 +64,8 @@ export type ProductsResponseNonTransformed = ProductsResponse & {
 };
 
 export type ChangeProduct = WithId<Omit<NewProduct, "categoryId">>;
+
+export type ProductRoute = BreadcrumbRoute;
 
 export const productApi = api.injectEndpoints({
   endpoints: (builder) => ({
@@ -133,6 +136,20 @@ export const productApi = api.injectEndpoints({
             ]
           : [{ type: "Products", id: "LIST", category }],
     }),
+
+    getProductBySlug: builder.query<Product<ProductFilter>, string>({
+      query: (product) => ({ url: `product/${product}` }),
+      transformResponse: (
+        product: Product & {
+          filters: [ProductFilter, ProductFilterVariant][];
+        },
+      ) => ({ ...product, filters: new Map(product.filters) }),
+      providesTags: (_result, _error, id) => [{ type: "Products", id }],
+    }),
+
+    getProductRoute: builder.query<ProductRoute[], string>({
+      query: (product) => ({ url: `product/${product}/route` }),
+    }),
   }),
 });
 
@@ -142,4 +159,6 @@ export const {
   useChangeProductMutation,
   useDeleteProductMutation,
   useGetPopularProductsQuery,
+  useGetProductBySlugQuery,
+  useGetProductRouteQuery,
 } = productApi;

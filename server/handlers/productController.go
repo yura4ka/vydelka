@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"log"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -27,7 +26,6 @@ func GetProducts(c *fiber.Ctx) error {
 
 	products, err := services.GetProducts(request)
 	if err != nil {
-		log.Print(err)
 		return c.SendStatus(500)
 	}
 
@@ -97,9 +95,35 @@ func GetPopularProducts(c *fiber.Ctx) error {
 
 	result, err := services.GetPopularProducts(category, lang)
 	if err != nil {
-		log.Print(err)
 		return c.SendStatus(500)
 	}
 
 	return c.JSON(result)
+}
+
+func GetProductBySlug(c *fiber.Ctx) error {
+	slug := c.Params("product")
+	lang := c.Locals("lang").(services.Language)
+
+	product, err := services.GetProductBySlug(slug, lang)
+	if err != nil {
+		return c.SendStatus(500)
+	}
+	if product == nil {
+		return c.SendStatus(400)
+	}
+
+	return c.JSON(product)
+}
+
+func GetProductRoute(c *fiber.Ctx) error {
+	slug := c.Params("product")
+	lang := c.Locals("lang").(services.Language)
+
+	routes, err := services.GetProductRoute(slug, lang)
+	if err != nil {
+		return c.SendStatus(500)
+	}
+
+	return c.JSON(routes)
 }
