@@ -22,6 +22,7 @@ func GetProducts(c *fiber.Ctx) error {
 		Page:             c.QueryInt("page", 1),
 		Lang:             c.Locals("lang").(services.Language),
 		Filters:          filters,
+		OrderBy:          c.Query("orderBy", "new"),
 	}
 
 	products, err := services.GetProducts(request)

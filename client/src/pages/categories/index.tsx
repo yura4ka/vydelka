@@ -14,7 +14,12 @@ import {
   useGetProductsQuery,
 } from "@/features/products/productsApiSlice";
 import { ProductCard } from "@/features/products/components/ProductCard";
-import { RESTRICTED_FILTERS, cn, sortBySubcategories } from "@/lib/utils";
+import {
+  PRODUCTS_ORDER_BY,
+  RESTRICTED_FILTERS,
+  cn,
+  sortBySubcategories,
+} from "@/lib/utils";
 import { Filter, FilterX, Loader2, XCircle } from "lucide-react";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { Pagination } from "@/components/Pagination";
@@ -130,22 +135,26 @@ const ProductSection: React.FC<ProductSectionProps> = ({
     }
 
     for (const r of RESTRICTED_FILTERS) {
-      const value = nextParams.get(r);
-      if (value !== null) {
-        nextParams.delete(r);
-        nextParams.set(r, value);
-      }
+      nextParams.delete(r);
     }
+
+    const orderBy = searchParams.get("orderBy");
+    if (orderBy !== null) nextParams.set("orderBy", orderBy);
 
     setSearchParams(nextParams);
   };
 
   const resetFilters = () => {
     const nextParams = new URLSearchParams();
-    for (const r of RESTRICTED_FILTERS) {
-      const value = searchParams.get(r);
-      if (value !== null) nextParams.set(r, value);
-    }
+    const orderBy = searchParams.get("orderBy");
+    if (orderBy !== null) nextParams.set("orderBy", orderBy);
+    setSearchParams(nextParams);
+  };
+
+  const setOrderBy = (orderBy: string) => {
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete("page");
+    nextParams.set("orderBy", orderBy);
     setSearchParams(nextParams);
   };
 
@@ -207,7 +216,10 @@ const ProductSection: React.FC<ProductSectionProps> = ({
         </div>
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="secondary" size="lg" className="flex lg:hidden">
+            <Button
+              variant="secondary"
+              className="flex xs:h-10 xs:px-8 lg:hidden"
+            >
               <Filter className="mr-2 h-4 w-4" />
               {t("product.filters")}
             </Button>
@@ -229,15 +241,24 @@ const ProductSection: React.FC<ProductSectionProps> = ({
             </div>
           </SheetContent>
         </Sheet>
-        <Select>
-          <SelectTrigger className="w-[180px] lg:shrink-0">
-            <SelectValue placeholder="By rating" />
+        <Select
+          value={searchParams.get("orderBy") ?? PRODUCTS_ORDER_BY[0]}
+          onValueChange={setOrderBy}
+        >
+          <SelectTrigger className="min-w-[100px] max-w-[180px] lg:shrink-0">
+            <SelectValue />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent
+            ref={(ref) =>
+              ref?.addEventListener("touchend", (e) => e.preventDefault())
+            }
+          >
             <SelectGroup>
-              <SelectItem value="apple">New</SelectItem>
-              <SelectItem value="banana">Cheapest</SelectItem>
-              <SelectItem value="blueberry">Most expensive</SelectItem>
+              {PRODUCTS_ORDER_BY.map((v) => (
+                <SelectItem key={v} value={v}>
+                  {t(`product.order-by.${v}`)}
+                </SelectItem>
+              ))}
             </SelectGroup>
           </SelectContent>
         </Select>

@@ -38,4 +38,11 @@ export function formatMoney(kop: number) {
   }).format(uah);
 }
 
-export const RESTRICTED_FILTERS = ["page", "orderBy"];
+export const RESTRICTED_FILTERS = ["orderBy", "page"];
+
+export const PRODUCTS_ORDER_BY = [
+  "new",
+  "rating",
+  "cheap",
+  "expensive",
+] as const;

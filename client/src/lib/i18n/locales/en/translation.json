@@ -48,6 +48,12 @@
   "product": {
     "filters": "Filters",
     "clear-all": "Clear All",
-    "not-found": "No products found..."
+    "not-found": "No products found...",
+    "order-by": {
+      "new": "New",
+      "rating": "By Rating",
+      "cheap": "Cheapest",
+      "expensive": "Most expensive"
+    }
   }
 }

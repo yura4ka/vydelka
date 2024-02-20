@@ -140,6 +140,7 @@ type ProductsRequest struct {
 	Lang             Language
 	Page             int
 	Filters          map[string][]string
+	OrderBy          string
 	Cnt              int
 }
 
@@ -219,6 +220,15 @@ func GetProducts(request *ProductsRequest) ([]Product, error) {
 		{{end}}
 		{{if not .WithTranslations}}
 			, pt.title, pt.description
+		{{end}}
+		{{if eq .OrderBy "new"}}
+			ORDER BY p.created_at DESC
+		{{else if eq .OrderBy "rating"}}
+			ORDER BY rating DESC, reviews DESC
+		{{else if eq .OrderBy "cheap"}}
+			ORDER BY p.price ASC
+		{{else if eq .OrderBy "expensive"}}
+			ORDER BY p.price DESC	
 		{{end}}
 		LIMIT ${{$arg_counter}}
 		{{$arg_counter = inc $arg_counter}}
