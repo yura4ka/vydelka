@@ -50,7 +50,18 @@ export const FileUploader: React.FC<Props> = ({
     if (!ctx) return;
 
     const handleUploadEvent = (e: CustomEvent<OutputFileEntry[]>) => {
-      if (e.detail && e.detail.length > 0) onChange([...e.detail]);
+      if (!e.detail || e.detail.length === 0) return;
+
+      if (rest.multiple === false) {
+        onChange(e.detail);
+        return;
+      }
+
+      let images = [...files, ...e.detail.filter((d) => d.isUploaded)];
+      const imagesMap = new Map(images.map((img) => [img.cdnUrl, img]));
+      images = [...imagesMap.values()];
+
+      onChange(images.splice(-(rest.multipleMax ?? 0)));
     };
 
     const handleDoneFlow = () => {
@@ -64,7 +75,7 @@ export const FileUploader: React.FC<Props> = ({
       ctx.removeEventListener("data-output", handleUploadEvent);
       ctx.removeEventListener("done-flow", handleDoneFlow);
     };
-  }, [onChange]);
+  }, [files, onChange, rest.multiple, rest.multipleMax]);
 
   return (
     <UploaderContext.Provider value={{ uploaderRef, files, onChange }}>
@@ -76,7 +87,10 @@ export const FileUploader: React.FC<Props> = ({
           pubkey={import.meta.env.VITE_UPLOAD_CARE_PUBLIC_TOKEN}
           secureSignature={ucareToken?.signature}
           secureExpire={ucareToken?.expire.toString()}
-          maxLocalFileSizeBytes={5000000}
+          maxLocalFileSizeBytes={Math.min(
+            5000000,
+            rest.maxLocalFileSizeBytes ?? Infinity,
+          )}
           imgOnly={true}
           sourceList="local, url"
           use-cloud-image-editor="true"

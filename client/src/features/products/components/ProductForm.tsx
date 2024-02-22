@@ -36,6 +36,10 @@ const initialForm = (initialData?: Product) => ({
   images: (initialData?.images.map((img) => ({
     uuid: img.id,
     cdnUrl: img.imageUrl,
+    imageInfo: {
+      width: img.width,
+      height: img.height,
+    },
   })) ?? []) as OutputFileEntry[],
 });
 
