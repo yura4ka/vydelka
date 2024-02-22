@@ -13,7 +13,7 @@ i18next
       en: {
         translation: translationEn,
       },
-      ua: {
+      uk: {
         translation: translationUa,
       },
     },

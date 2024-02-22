@@ -11,7 +11,7 @@ import { api } from "@/app/api/apiSlice";
 
 const languages = [
   { value: "en", title: "🇺🇸 English" },
-  { value: "ua", title: "🇺🇦 Українська" },
+  { value: "uk", title: "🇺🇦 Українська" },
 ];
 
 export const LanguageToggle = () => {

@@ -10,7 +10,7 @@ type Language string
 
 var ClientToServerLanguage map[string]Language = map[string]Language{
 	"en": "english",
-	"ua": "ukrainian",
+	"uk": "ukrainian",
 }
 
 var Languages = struct {
@@ -23,7 +23,7 @@ var Languages = struct {
 
 type Translations struct {
 	En string `json:"en" validate:"required" mod:"trim"`
-	Ua string `json:"ua" validate:"required" mod:"trim"`
+	Ua string `json:"uk" validate:"required" mod:"trim"`
 }
 
 func CreateTranslations(tx *pgx.Tx, t Translations) (string, error) {
@@ -49,9 +49,9 @@ func ChangeTranslation(tx *pgx.Tx, t Translations, translationId string) error {
 	_, err := (*tx).Exec(db.Ctx, `
 		UPDATE translations SET content = $1 WHERE item_id = $2 AND lang = $3;
 	`, t.En, translationId, Languages.En)
-	
+
 	if err != nil {
-		return err;
+		return err
 	}
 
 	_, err = (*tx).Exec(db.Ctx, `
