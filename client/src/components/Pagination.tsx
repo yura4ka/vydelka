@@ -13,9 +13,10 @@ type Props = {
   totalPages: number;
   page: number;
   onChange?: (page: number) => void;
+  hash?: string;
 };
 
-export const Pagination = ({ totalPages, page, onChange }: Props) => {
+export const Pagination = ({ totalPages, page, onChange, hash }: Props) => {
   const [params] = useSearchParams();
 
   const range = useMemo(() => {
@@ -58,7 +59,7 @@ export const Pagination = ({ totalPages, page, onChange }: Props) => {
   const generateLink = (page: number) => {
     const searchParams = new URLSearchParams(params);
     searchParams.set("page", page.toString());
-    return `?${searchParams.toString()}`;
+    return `?${searchParams.toString()}#${hash}`;
   };
 
   if (!range) return null;

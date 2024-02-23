@@ -1,4 +1,6 @@
 {
+  "success": "Success!",
+  "cancel": "Cancel",
   "navigation": {
     "categories": "Categories",
     "search-placeholder": "Search...",
@@ -49,11 +51,36 @@
     "filters": "Filters",
     "clear-all": "Clear All",
     "not-found": "No products found...",
+    "add-to-cart": "Add to Cart",
+    "by-now": "By Now",
     "order-by": {
       "new": "New",
       "rating": "By Rating",
       "cheap": "Cheapest",
       "expensive": "Most expensive"
+    },
+    "navigation": {
+      "about": "About",
+      "features": "Features",
+      "reviews": "Reviews"
+    },
+    "reviews": {
+      "reviews_one": "review",
+      "reviews_other": "reviews",
+      "create-review": "Create a review",
+      "create": "Create",
+      "auth-required": "<1>Sign in</1> or <2>Sign up</2> to make a review",
+      "rating": "Rating",
+      "placeholder": "Review...",
+      "created": "Your review was created!",
+      "changed": "Your review was changed!",
+      "deleted": "Your review was deleted!",
+      "created-at": "Created at",
+      "edited": "Edited",
+      "verified": "From the customer",
+      "edit": "Edit",
+      "delete": "Delete",
+      "edit-review": "Edit this review"
     }
   }
 }

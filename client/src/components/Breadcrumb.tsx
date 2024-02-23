@@ -7,11 +7,11 @@ export type BreadcrumbRoute = {
   slug: string;
 };
 
-type Props = {
+type Props = React.HTMLAttributes<HTMLDivElement> & {
   routes: BreadcrumbRoute[];
 };
 
-export const Breadcrumb: React.FC<Props> = ({ routes }) => {
+export const Breadcrumb: React.FC<Props> = ({ routes, className, ...rest }) => {
   const { t } = useTranslation();
 
   const mobile = (
@@ -28,7 +28,7 @@ export const Breadcrumb: React.FC<Props> = ({ routes }) => {
   );
 
   return (
-    <nav>
+    <nav className={className} {...rest}>
       {mobile}
       <ul className="hidden flex-wrap items-center gap-2 text-sm md:flex">
         <li className="transition-colors hover:text-primary">

@@ -16,4 +16,8 @@ func addProductRouter(app *fiber.App) {
 	product.Post("/", middleware.RequireAdmin, handlers.CreateProduct)
 	product.Put("/", middleware.RequireAdmin, handlers.ChangeProduct)
 	product.Delete("/:id", middleware.RequireAdmin, handlers.DeleteProduct)
+	product.Get("/:id/reviews", handlers.GetReviews)
+	product.Post("/:id/reviews", middleware.RequireAuth, handlers.CreateReview)
+	product.Put("/:id/reviews/:reviewId", middleware.RequireAuth, handlers.ChangeReview)
+	product.Delete("/:id/reviews/:reviewId", middleware.RequireAuth, handlers.DeleteReview)
 }

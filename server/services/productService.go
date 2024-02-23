@@ -194,8 +194,7 @@ func GetProducts(request *ProductsRequest) ([]Product, error) {
 			{{else}}
 				pt.title, pt.description
 			{{end}},
-			COALESCE(AVG(r.rating), 0) AS rating,
-			COUNT(r.*) AS reviews
+			COALESCE(r.rating, 0) AS rating, r.cnt AS reviews
 		{{if .Filters}}
 			FROM filtered_products AS p
 		{{else}}
@@ -211,10 +210,14 @@ func GetProducts(request *ProductsRequest) ([]Product, error) {
 		LEFT JOIN translation_items AS fti ON fv.variant_translation_item = fti.id
 		LEFT JOIN translations AS ft ON fti.id = ft.item_id AND ft.lang = ${{$arg_counter}}
 		{{$arg_counter = inc $arg_counter}}
-		LEFT JOIN reviews AS r ON p.id = r.product_id
+		LEFT JOIN LATERAL (
+			SELECT COUNT(*) AS cnt, AVG(rating) AS rating
+			FROM reviews
+			WHERE product_id = p.id
+		) r ON TRUE
 		WHERE p.category_id = ${{$arg_counter}}
 		{{$arg_counter = inc $arg_counter}}
-		GROUP BY p.id
+		GROUP BY p.id, r.rating, r.cnt
 		{{if .Filters}}
 			, p.slug, p.price
 		{{end}}
@@ -222,6 +225,7 @@ func GetProducts(request *ProductsRequest) ([]Product, error) {
 			, pt.title, pt.description
 		{{end}}
 		{{if eq .OrderBy "new"}}
+			, p.created_at
 			ORDER BY p.created_at DESC
 		{{else if eq .OrderBy "rating"}}
 			ORDER BY rating DESC, reviews DESC
@@ -401,15 +405,18 @@ func GetPopularProducts(category string, lang Language) ([]Product, error) {
 				'id', pi.id, 'imageUrl', pi.image_url, 'width', pi.width, 'height', pi.height
 			)) AS images,
 			COALESCE(SUM(o.quantity), 0) AS popularity,
-			COALESCE(AVG(r.rating), 0) AS rating,
-			COUNT(r.*) AS reviews
+			COALESCE(r.rating, 0) AS rating, r.cnt AS reviews
 		FROM products AS p
 		JOIN CategoryHierarchy AS c ON p.category_id = c.id
 		LEFT JOIN product_translations AS pt ON p.id = pt.product_id AND pt.lang = $1
 		LEFT JOIN product_images AS pi ON p.id = pi.product_id
 		LEFT JOIN order_content AS o ON p.id = o.product_id
-		LEFT JOIN reviews AS r ON p.id = r.product_id
-		GROUP BY p.id, pt.title, pt.description
+		LEFT JOIN LATERAL (
+			SELECT COUNT(*) AS cnt, AVG(rating) AS rating
+			FROM reviews
+			WHERE product_id = p.id
+		) r ON TRUE
+		GROUP BY p.id, pt.title, pt.description, r.rating, r,cnt
 		ORDER BY popularity DESC, rating DESC
 		LIMIT 12;
 	`))
@@ -436,8 +443,7 @@ func GetProductBySlug(slug string, lang Language) (*Product, error) {
 			jsonb_build_object('id', f.id, 'slug', f.slug, 'title', ft.content), 
 			jsonb_build_object('id', fv.id, 'slug', fv.slug, 'variant', vt.content)
 		)) AS filters,
-		COALESCE(AVG(r.rating), 0) AS rating,
-		COUNT(r.*) AS reviews
+		COALESCE(r.rating, 0) AS rating, r.cnt AS reviews
 		FROM products AS p
 		LEFT JOIN product_translations AS pt ON p.id = pt.product_id AND pt.lang = $1
 		LEFT JOIN product_images AS pi ON p.id = pi.product_id
@@ -448,9 +454,13 @@ func GetProductBySlug(slug string, lang Language) (*Product, error) {
 		LEFT JOIN translations AS vt ON vti.id = vt.item_id AND vt.lang = $1
 		LEFT JOIN translation_items AS fti ON f.title_translation_item = fti.id
 		LEFT JOIN translations AS ft ON fti.id = ft.item_id AND ft.lang = $1
-		LEFT JOIN reviews AS r ON p.id = r.product_id
+		LEFT JOIN LATERAL (
+			SELECT COUNT(*) AS cnt, AVG(rating) AS rating
+			FROM reviews
+			WHERE product_id = p.id
+		) r ON TRUE
 		WHERE p.slug = $2
-		GROUP BY p.id, pt.title, pt.description;
+		GROUP BY p.id, pt.title, pt.description, r.rating, r.cnt;
 	`, lang, slug)
 	if pgxscan.NotFound(err) {
 		return nil, nil
@@ -472,7 +482,7 @@ func GetProductRoute(slug string, lang Language) ([]CategoryRoute, error) {
 	}
 
 	result, err := GetCategoryRoute(product.Category, lang)
-	result = append(result, CategoryRoute{"", ""})
+	result = append(result, CategoryRoute{product.Title, slug})
 
 	return result, err
 }

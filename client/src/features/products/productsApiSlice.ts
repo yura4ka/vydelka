@@ -67,6 +67,45 @@ export type ChangeProduct = WithId<Omit<NewProduct, "categoryId">>;
 
 export type ProductRoute = BreadcrumbRoute;
 
+export type Review = {
+  id: string;
+  createdAt: string;
+  updatedAt?: string;
+  content: string;
+  rating: number;
+  userId: string;
+  userName: string;
+  productId: string;
+  isVerified: boolean;
+};
+
+export type ReviewResponse = {
+  reviews: Review[];
+  hasMore: boolean;
+  totalPages: number;
+};
+
+export type ReviewsRequest = {
+  productId: string;
+  page: number;
+};
+
+export type NewReview = {
+  content: string;
+  rating: number;
+  productId: string;
+};
+
+export type ChangeReview = NewReview & {
+  reviewId: string;
+  page: number;
+};
+
+export type DeleteReview = {
+  productId: string;
+  reviewId: string;
+};
+
 export const productApi = api.injectEndpoints({
   endpoints: (builder) => ({
     createProduct: builder.mutation<{ id: string }, NewProduct>({
@@ -78,7 +117,7 @@ export const productApi = api.injectEndpoints({
 
     getProducts: builder.query<ProductsResponse, ProductsRequest>({
       query: (args) => ({
-        url: `product?${args.filters}`,
+        url: `product?${args.filters ?? ""}`,
         params: {
           withTranslations: args.withTranslations,
           page: args.page,
@@ -137,18 +176,82 @@ export const productApi = api.injectEndpoints({
           : [{ type: "Products", id: "LIST", category }],
     }),
 
-    getProductBySlug: builder.query<Product<ProductFilter>, string>({
+    getProductBySlug: builder.query<
+      Product & {
+        filters: [ProductFilter, ProductFilterVariant][];
+      },
+      string
+    >({
       query: (product) => ({ url: `product/${product}` }),
-      transformResponse: (
-        product: Product & {
-          filters: [ProductFilter, ProductFilterVariant][];
-        },
-      ) => ({ ...product, filters: new Map(product.filters) }),
       providesTags: (_result, _error, id) => [{ type: "Products", id }],
     }),
 
     getProductRoute: builder.query<ProductRoute[], string>({
       query: (product) => ({ url: `product/${product}/route` }),
+    }),
+
+    getReviews: builder.query<ReviewResponse, ReviewsRequest>({
+      query: (args) => ({
+        url: `product/${args.productId}/reviews?page=${args.page}`,
+      }),
+      providesTags: (result, _, { productId }) =>
+        result
+          ? [
+              ...result.reviews.map((r) => ({
+                type: "Reviews" as const,
+                id: r.id,
+                productId,
+              })),
+              { type: "Reviews", id: "LIST", productId },
+            ]
+          : [{ type: "Reviews", id: "LIST", productId }],
+    }),
+
+    createReview: builder.mutation<string, NewReview>({
+      query: (args) => ({
+        url: `product/${args.productId}/reviews`,
+        method: "POST",
+        body: { content: args.content, rating: args.rating },
+      }),
+      invalidatesTags: (_result, _error, { productId }) => [
+        { type: "Reviews", productId },
+      ],
+    }),
+
+    changeReview: builder.mutation<void, ChangeReview>({
+      query: (args) => ({
+        url: `product/${args.productId}/reviews/${args.reviewId}`,
+        method: "PUT",
+        body: { content: args.content, rating: args.rating },
+      }),
+      onQueryStarted: (args, { dispatch, queryFulfilled }) => {
+        const patchResult = dispatch(
+          productApi.util.updateQueryData(
+            "getReviews",
+            { productId: args.productId, page: args.page },
+            (draft) => {
+              Object.assign(
+                draft.reviews.find((r) => r.id === args.reviewId)!,
+                {
+                  content: args.content,
+                  rating: args.rating,
+                },
+              );
+            },
+          ),
+        );
+        queryFulfilled.catch(() => patchResult.undo());
+      },
+    }),
+
+    deleteReview: builder.mutation<void, DeleteReview>({
+      query: (args) => ({
+        url: `product/${args.productId}/reviews/${args.reviewId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (_result, _error, { productId, reviewId }) => [
+        { type: "Reviews", id: reviewId, productId },
+      ],
     }),
   }),
 });
@@ -161,4 +264,8 @@ export const {
   useGetPopularProductsQuery,
   useGetProductBySlugQuery,
   useGetProductRouteQuery,
+  useGetReviewsQuery,
+  useCreateReviewMutation,
+  useChangeReviewMutation,
+  useDeleteReviewMutation,
 } = productApi;

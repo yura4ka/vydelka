@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -26,11 +27,13 @@ func GetProducts(c *fiber.Ctx) error {
 
 	products, err := services.GetProducts(request)
 	if err != nil {
+		log.Print(err)
 		return c.SendStatus(500)
 	}
 
 	hasMore, total, err := services.HasMoreProducts(request)
 	if err != nil {
+		log.Print(err)
 		return c.SendStatus(500)
 	}
 
@@ -126,4 +129,75 @@ func GetProductRoute(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(routes)
+}
+
+func GetReviews(c *fiber.Ctx) error {
+	id := c.Params("id")
+	page := c.QueryInt("page", 1)
+
+	reviews, err := services.GetReviews(id, page)
+	if err != nil {
+		return c.SendStatus(500)
+	}
+
+	hasMore, totalPages, err := services.HasMoreReviews(id, page)
+	if err != nil {
+		return c.SendStatus(500)
+	}
+
+	return c.JSON(fiber.Map{
+		"totalPages": totalPages,
+		"hasMore":    hasMore,
+		"reviews":    reviews,
+	})
+}
+
+func CreateReview(c *fiber.Ctx) error {
+	input := new(services.NewReview)
+	if err := services.ValidateJSON(c, input); err != nil {
+		return err
+	}
+	id := c.Params("id")
+	userId := c.Locals("userId").(string)
+
+	reviewId, err := services.CreateReview(userId, id, input)
+	if err != nil {
+		return c.SendStatus(500)
+	}
+
+	return c.JSON(reviewId)
+}
+
+func ChangeReview(c *fiber.Ctx) error {
+	input := new(services.NewReview)
+	if err := services.ValidateJSON(c, input); err != nil {
+		return err
+	}
+	id := c.Params("id")
+	reviewId := c.Params("reviewId")
+	userId := c.Locals("userId").(string)
+
+	err := services.ChangeReview(userId, id, reviewId, input)
+	if err != nil {
+		return c.SendStatus(500)
+	}
+
+	return c.JSON(fiber.Map{
+		"message": "Ok",
+	})
+}
+
+func DeleteReview(c *fiber.Ctx) error {
+	id := c.Params("id")
+	reviewId := c.Params("reviewId")
+	userId := c.Locals("userId").(string)
+
+	err := services.DeleteReview(userId, id, reviewId)
+	if err != nil {
+		return c.SendStatus(500)
+	}
+
+	return c.JSON(fiber.Map{
+		"message": "Ok",
+	})
 }

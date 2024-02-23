@@ -18,7 +18,7 @@ export const CustomTextArea: React.FC<Props> = ({
 
   const resizeTextArea = (element: HTMLTextAreaElement, reset = false) => {
     element.style.height = "";
-    if (!reset) element.style.height = element.scrollHeight + "px";
+    if (!reset) element.style.height = element.scrollHeight + 2 + "px";
   };
 
   return (

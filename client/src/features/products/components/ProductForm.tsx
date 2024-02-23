@@ -128,7 +128,6 @@ export const ProductForm: React.FC<Props> = ({
         setForm(initialForm());
       })
       .catch((e) => {
-        console.log(e);
         onError?.(e.data.message);
       });
   };

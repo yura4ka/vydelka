@@ -4,6 +4,7 @@ import { Home } from "./pages/home";
 import { SignIn, SignUp } from "./pages/auth";
 import { AdminCategories } from "./pages/admin";
 import { CategoryPage } from "./pages/categories";
+import { ProductPage } from "./pages/products";
 
 const router = createBrowserRouter([
   {
@@ -13,6 +14,7 @@ const router = createBrowserRouter([
       { index: true, element: <Home /> },
       { path: "/categories", element: <CategoryPage /> },
       { path: "/:slug", element: <CategoryPage /> },
+      { path: "/p/:slug", element: <ProductPage /> },
       {
         path: "auth",
         children: [
