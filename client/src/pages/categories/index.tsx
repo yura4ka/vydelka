@@ -330,7 +330,7 @@ export const CategoryPage = () => {
   }
 
   return (
-    <main className="px-2 py-8 sm:container xs:px-4 sm:max-w-screen-2xl">
+    <main className="container max-w-screen-2xl px-2 py-8 xs:px-4">
       <Breadcrumb routes={routes ?? []} />
       <h1 className="pt-8 text-4xl font-extrabold tracking-tight">
         {data?.title ?? t("navigation.categories")}

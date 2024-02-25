@@ -91,5 +91,20 @@
     "added": "The item has been added to the cart",
     "open": "Open",
     "total": "Total"
+  },
+  "checkout": {
+    "checkout": "Checkout",
+    "contacts": "Contact Details",
+    "continue": "Continue",
+    "delivery": "Delivery",
+    "address": "Address",
+    "takeout": "Take out",
+    "payment": "Payment",
+    "pay-now": "Pay now",
+    "pay-receive": "Pay upon receive",
+    "confirm": "Confirm",
+    "pay": "Proceed to payment",
+    "items": "Items",
+    "edit-items": "Edit items"
   }
 }

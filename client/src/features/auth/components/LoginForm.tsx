@@ -47,7 +47,7 @@ export const LoginForm = ({ className, onSuccess, ...rest }: Props) => {
 
   return (
     <Card className={cn("w-full max-w-[420px]", className)}>
-      <CardHeader>
+      <CardHeader className="px-4 sm:px-6">
         <CardTitle>{t("auth.sign-in")}</CardTitle>
         <CardDescription>
           <span>{t("auth.don't-have-account")} </span>
@@ -56,7 +56,7 @@ export const LoginForm = ({ className, onSuccess, ...rest }: Props) => {
           </Link>
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-4 sm:px-6">
         <form onSubmit={onSubmit} className="grid gap-6" {...rest}>
           <CustomInput
             type="text"

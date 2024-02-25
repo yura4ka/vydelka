@@ -54,7 +54,7 @@ const PopularProductsSection = () => {
   if (!data) return null;
 
   return (
-    <section className="container space-y-8 py-8">
+    <section className="container space-y-8 px-4 py-8">
       <h1 className="text-2xl font-bold tracking-tight">{t("home.popular")}</h1>
       <div className="scrollbar grid snap-x snap-mandatory auto-cols-[50%] grid-flow-col gap-8 overflow-x-scroll overscroll-x-contain pb-4 sm:auto-cols-[20%]">
         {data.map((p) => (
@@ -69,7 +69,7 @@ const RecentProductsSection = () => {
   const { t } = useTranslation();
 
   return (
-    <section className="container py-8">
+    <section className="container px-4 py-8">
       <h1 className="text-2xl font-bold tracking-tight">{t("home.recent")}</h1>
     </section>
   );

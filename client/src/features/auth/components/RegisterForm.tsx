@@ -104,7 +104,7 @@ export const RegisterForm = ({
 
   return (
     <Card className={cn("w-full max-w-[700px]", className)}>
-      <CardHeader>
+      <CardHeader className="px-4 sm:px-6">
         <CardTitle>{t("auth.sign-up")}</CardTitle>
         <CardDescription>
           <span>{t("auth.have-account")} </span>
@@ -113,7 +113,7 @@ export const RegisterForm = ({
           </Link>
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-4 sm:px-6">
         <form
           onSubmit={onSubmit}
           className="grid gap-x-6 gap-y-10 sm:grid-cols-2"
