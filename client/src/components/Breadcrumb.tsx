@@ -34,6 +34,7 @@ export const Breadcrumb: React.FC<Props> = ({ routes, className, ...rest }) => {
         <li className="transition-colors hover:text-primary">
           <Link to="/">
             <Home className="h-4 w-4" />
+            <span className="sr-only">{t("navigation.home")}</span>
           </Link>
         </li>
         {routes.map((r) => (

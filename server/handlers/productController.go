@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"log"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -16,24 +15,29 @@ func GetProducts(c *fiber.Ctx) error {
 		}
 	}
 
+	idsStr := c.Query("ids")
+	ids := make([]string, 0)
+	if idsStr != "" {
+		ids = strings.Split(idsStr, ",")
+	}
+
 	request := &services.ProductsRequest{
 		CategoryId:       c.Query("categoryId"),
 		WithTranslations: c.QueryBool("withTranslations"),
-		Page:             c.QueryInt("page", 1),
+		Page:             c.QueryInt("page", 0),
 		Lang:             c.Locals("lang").(services.Language),
 		Filters:          filters,
 		OrderBy:          c.Query("orderBy", "new"),
+		Ids:              ids,
 	}
 
 	products, err := services.GetProducts(request)
 	if err != nil {
-		log.Print(err)
 		return c.SendStatus(500)
 	}
 
 	hasMore, total, err := services.HasMoreProducts(request)
 	if err != nil {
-		log.Print(err)
 		return c.SendStatus(500)
 	}
 

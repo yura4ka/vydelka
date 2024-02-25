@@ -28,6 +28,7 @@ export const LanguageToggle = () => {
       <DropdownMenuTrigger asChild>
         <Button size="icon" variant="ghost">
           {i18n.resolvedLanguage}
+          <span className="sr-only">change language</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

@@ -1,6 +1,8 @@
 import { Fragment, useMemo } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { Filter, FilterX, Loader2, XCircle } from "lucide-react";
+import { useDebounce } from "@/hooks";
 import {
   CategoryNavigation,
   useGetCategoryBySlugQuery,
@@ -20,7 +22,6 @@ import {
   cn,
   sortBySubcategories,
 } from "@/lib/utils";
-import { Filter, FilterX, Loader2, XCircle } from "lucide-react";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { Pagination } from "@/components/Pagination";
 import { Label } from "@/components/ui/label";
@@ -42,7 +43,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { useDebounce } from "@/hooks";
 
 type CategoriesProps = {
   categories: CategoryNavigation[] | undefined;

@@ -1,8 +1,10 @@
+import { useAppSelector } from "@/app/hooks";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { Pagination } from "@/components/Pagination";
 import { Rating } from "@/components/Rating";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
+import { toCartItem, useCart } from "@/features/cart";
 import { ProductImages } from "@/features/products/components/ProductImages";
 import { ReviewCard } from "@/features/products/components/ReviewCard";
 import { ReviewForm } from "@/features/products/components/ReviewForm";
@@ -13,7 +15,6 @@ import {
 } from "@/features/products/productsApiSlice";
 import { cn, formatMoney } from "@/lib/utils";
 import { Loader2, ShoppingBag, ShoppingCart, Star } from "lucide-react";
-import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, Navigate, useParams, useSearchParams } from "react-router-dom";
 
@@ -34,7 +35,8 @@ export const ProductPage = () => {
     { skip: !product },
   );
 
-  const reviewsRef = useRef<HTMLDivElement>(null);
+  const cart = useCart();
+  const isInCart = !!useAppSelector(() => cart.getItem(product?.id ?? ""));
 
   const { toast } = useToast();
   const onFormError = () => {
@@ -82,7 +84,6 @@ export const ProductPage = () => {
       ) : (
         <>
           <section
-            ref={reviewsRef}
             id="about"
             className="flex scroll-m-[12rem] flex-col gap-4 md:flex-row"
           >
@@ -104,14 +105,35 @@ export const ProductPage = () => {
                 <div className="text-2xl font-bold tracking-tighter">
                   {formatMoney(product.price)}
                 </div>
-                <div className="flex gap-2">
-                  <Button>
-                    <ShoppingCart className="mr-2 size-5" />
-                    {t("product.add-to-cart")}
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    className="grow"
+                    onClick={() =>
+                      isInCart
+                        ? cart.removeItem(product.id)
+                        : cart.addItem(toCartItem(product, 1))
+                    }
+                  >
+                    <ShoppingCart
+                      className={cn(
+                        "mr-2 size-5",
+                        isInCart && "fill-foreground",
+                      )}
+                    />
+                    {isInCart ? t("product.in-cart") : t("product.add-to-cart")}
                   </Button>
-                  <Button variant="secondary">
-                    <ShoppingBag className="mr-2 size-5" />
-                    {t("product.by-now")}
+                  <Button
+                    onClick={() => {
+                      if (!isInCart) cart.addItem(toCartItem(product, 1));
+                    }}
+                    className="grow"
+                    variant="secondary"
+                    asChild
+                  >
+                    <Link to={"/checkout"}>
+                      <ShoppingBag className="mr-2 size-5" />
+                      {t("product.by-now")}
+                    </Link>
                   </Button>
                 </div>
               </div>

@@ -4,6 +4,7 @@ import { Footer } from "./Footer";
 import { useAuth } from "@/features/auth/useAuth";
 import { Toaster } from "../ui/toaster";
 import { useEffect } from "react";
+import { CartModal } from "@/features/cart";
 
 export const Layout = () => {
   useAuth();
@@ -17,6 +18,7 @@ export const Layout = () => {
       .getElementById(hash.slice(1))
       ?.scrollIntoView({ behavior: "auto", block: "start" });
   }, [location]);
+
   return (
     <div className="grid min-h-screen grid-rows-[auto_1fr_auto]">
       <Navbar />
@@ -24,6 +26,7 @@ export const Layout = () => {
       <Footer />
       <Toaster />
       <ScrollRestoration getKey={(location) => location.pathname} />
+      <CartModal />
     </div>
   );
 };

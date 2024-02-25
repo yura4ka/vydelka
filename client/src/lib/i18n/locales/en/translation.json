@@ -52,6 +52,7 @@
     "clear-all": "Clear All",
     "not-found": "No products found...",
     "add-to-cart": "Add to Cart",
+    "in-cart": "In the Cart",
     "by-now": "By Now",
     "order-by": {
       "new": "New",
@@ -82,5 +83,13 @@
       "delete": "Delete",
       "edit-review": "Edit this review"
     }
+  },
+  "cart": {
+    "place-order": "Place an order",
+    "continue": "Continue shopping",
+    "empty": "The cart is empty...",
+    "added": "The item has been added to the cart",
+    "open": "Open",
+    "total": "Total"
   }
 }

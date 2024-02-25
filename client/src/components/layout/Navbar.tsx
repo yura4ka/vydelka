@@ -46,6 +46,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useCart } from "@/features/cart";
+import { useAppSelector } from "@/app/hooks";
 
 const MAX_SUB = 10;
 
@@ -248,6 +250,8 @@ const MobileCategories: React.FC<MobileProps> = ({ open, setOpen }) => {
 
 const MobileMenu = () => {
   const { t } = useTranslation();
+  const cart = useCart();
+  const cartItemsSize = useAppSelector(() => cart.getIds()).length;
 
   const [logout] = useLogoutMutation();
   const { isAuth, user } = useAuth();
@@ -273,6 +277,7 @@ const MobileMenu = () => {
           className="justify-normal lg:hidden"
         >
           <Menu />
+          <span className="sr-only">Open menu</span>
         </Button>
       </SheetTrigger>
 
@@ -305,8 +310,16 @@ const MobileMenu = () => {
               open={isCategoryOpen}
               setOpen={onCategoryOpenChange}
             />
-            <button className="flex w-full justify-start gap-1 border-b px-6 py-4 font-bold transition-colors hover:bg-accent">
+            <button
+              onClick={() => cart.setOpen(true)}
+              className="flex w-full items-center justify-start gap-1 border-b px-6 py-4 font-bold transition-colors hover:bg-accent"
+            >
               <ShoppingCart className="mr-2" /> {t("navigation.cart")}
+              {cartItemsSize !== 0 && (
+                <div className="bg-text-primary ml-1 grid h-5 min-w-5 place-content-center rounded-full bg-primary px-1 text-sm font-normal">
+                  {cartItemsSize}
+                </div>
+              )}
             </button>
             {isAuth && (
               <div onClick={() => setOpen(false)}>
@@ -380,6 +393,7 @@ const UserButton = () => {
       <DropdownMenuTrigger asChild>
         <Button size="icon" variant="secondary" className="rounded-full">
           {user.firstName[0] + user.lastName[0]}
+          <span className="sr-only">User</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
@@ -419,6 +433,8 @@ const UserButton = () => {
 
 export const Navbar = () => {
   const { t } = useTranslation();
+  const cart = useCart();
+  const cartItemsSize = useAppSelector(() => cart.getIds()).length;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -441,8 +457,20 @@ export const Navbar = () => {
             />
           </form>
           <div className="flex items-center">
-            <Button size="icon" variant="ghost">
+            <Button
+              onClick={() => cart.setOpen(true)}
+              size="icon"
+              variant="ghost"
+              className="relative"
+            >
+              <span className="sr-only">Open cart</span>
               <ShoppingCart className="h-5 w-5" />
+              {cartItemsSize !== 0 && (
+                <div className="absolute right-0 top-0 rounded-full bg-primary px-1 text-xs text-primary-foreground">
+                  {cartItemsSize}
+                  <span className="sr-only">items in the cart</span>
+                </div>
+              )}
             </Button>
             <div className="hidden sm:flex">
               <UserButton />

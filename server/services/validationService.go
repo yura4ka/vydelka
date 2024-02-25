@@ -23,7 +23,7 @@ type (
 	}
 )
 
-var FORBIDDEN_FILTERS = []string{"categoryId", "withTranslations", "page", "orderBy"}
+var FORBIDDEN_FILTERS = []string{"categoryId", "withTranslations", "page", "orderBy", "ids"}
 
 var validate = validator.New()
 var conform = modifiers.New()

@@ -7,6 +7,7 @@ import (
 
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/yura4ka/vydelka/db"
 )
 
@@ -141,6 +142,7 @@ type ProductsRequest struct {
 	Page             int
 	Filters          map[string][]string
 	OrderBy          string
+	Ids              []string
 	Cnt              int
 }
 
@@ -215,8 +217,15 @@ func GetProducts(request *ProductsRequest) ([]Product, error) {
 			FROM reviews
 			WHERE product_id = p.id
 		) r ON TRUE
-		WHERE p.category_id = ${{$arg_counter}}
-		{{$arg_counter = inc $arg_counter}}
+		WHERE TRUE
+		{{if .CategoryId}}
+			AND p.category_id = ${{$arg_counter}}
+			{{$arg_counter = inc $arg_counter}}
+		{{end}}
+		{{if .Ids}}
+			AND p.id = ANY(${{$arg_counter}}::uuid[])
+			{{$arg_counter = inc $arg_counter}}
+		{{end}}
 		GROUP BY p.id, r.rating, r.cnt
 		{{if .Filters}}
 			, p.slug, p.price
@@ -244,10 +253,23 @@ func GetProducts(request *ProductsRequest) ([]Product, error) {
 	if len(request.Filters) != 0 {
 		filtersQuery, args = createFiltersQuery(request.Filters)
 	}
+	args = append(args, request.Lang)
+	request.Cnt = len(args)
 
-	request.Cnt = len(args) + 1
-	offset := (request.Page - 1) * PRODUCTS_PER_PAGE
-	args = append(args, request.Lang, request.CategoryId, PRODUCTS_PER_PAGE, offset)
+	if request.CategoryId != "" {
+		args = append(args, request.CategoryId)
+	}
+	if len(request.Ids) > 0 {
+		args = append(args, request.Ids)
+	}
+
+	offset := 0
+	limit := pgtype.Int4{Int32: PRODUCTS_PER_PAGE}
+	if request.Page > 0 {
+		offset = (request.Page - 1) * PRODUCTS_PER_PAGE
+		limit.Valid = true
+	}
+	args = append(args, limit, offset)
 
 	query := filtersQuery + ExecuteTemplate(tmpl, request)
 	products := make([]dbProduct, 0)
@@ -284,7 +306,11 @@ func HasMoreProducts(request *ProductsRequest) (bool, int, error) {
 		{{else}}
 			FROM products AS p
 		{{end}}
-		WHERE p.category_id = ${{.Cnt}};
+		WHERE TRUE
+			{{if .CategoryId}}
+				AND p.category_id = ${{.Cnt}}
+			{{end}}
+		;
 	`))
 
 	args := make([]any, 0)
@@ -294,7 +320,9 @@ func HasMoreProducts(request *ProductsRequest) (bool, int, error) {
 	}
 
 	request.Cnt = len(args) + 1
-	args = append(args, request.CategoryId)
+	if request.CategoryId != "" {
+		args = append(args, request.CategoryId)
+	}
 	query := filtersQuery + ExecuteTemplate(tmpl, request)
 
 	var total int

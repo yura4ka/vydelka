@@ -5,6 +5,8 @@ import { Product } from "../productsApiSlice";
 import { Button } from "@/components/ui/button";
 import { Filter } from "@/features/categories/categoriesApiSlice";
 import { Rating } from "@/components/Rating";
+import { toCartItem, useCart } from "@/features/cart";
+import { useAppSelector } from "@/app/hooks";
 
 type Props = React.HTMLAttributes<HTMLDivElement> & {
   product: Product;
@@ -17,6 +19,9 @@ export const ProductCard: React.FC<Props> = ({
   filters,
   ...rest
 }) => {
+  const cart = useCart();
+  const isInCart = !!useAppSelector(() => cart.getItem(product.id));
+
   return (
     <div
       className={cn(
@@ -64,8 +69,21 @@ export const ProductCard: React.FC<Props> = ({
       </div>
       <div className="flex items-center justify-between gap-1 text-lg font-medium sm:text-xl">
         {formatMoney(product.price)}
-        <Button variant="ghost" size="icon">
-          <ShoppingCart className="size-5 xs:size-6" />
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() =>
+            isInCart
+              ? cart.removeItem(product.id)
+              : cart.addItem(toCartItem(product, 1))
+          }
+        >
+          <ShoppingCart
+            className={cn("size-5 xs:size-6", isInCart && "fill-foreground")}
+          />
+          <span className="sr-only">
+            {isInCart ? "remove from cart" : "add to cart"}
+          </span>
         </Button>
       </div>
       {product.filters.size !== 0 && (

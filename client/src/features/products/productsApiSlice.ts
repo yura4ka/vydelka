@@ -51,6 +51,7 @@ export type ProductsRequest = {
   withTranslations?: boolean;
   page?: number;
   filters?: string;
+  ids?: string[];
 };
 
 export type ProductsResponse = {
@@ -122,6 +123,7 @@ export const productApi = api.injectEndpoints({
           withTranslations: args.withTranslations,
           page: args.page,
           categoryId: args.categoryId,
+          ids: args.ids?.join(","),
         },
       }),
       transformResponse: (response: ProductsResponseNonTransformed) => {

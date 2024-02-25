@@ -88,4 +88,14 @@
   .scrollbar::-webkit-scrollbar-thumb {
     @apply rounded-sm bg-secondary outline-none;
   }
+
+  input.no-arrows::-webkit-outer-spin-button,
+  input.no-arrows::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input[type="number"].no-arrows {
+    -moz-appearance: textfield;
+  }
 }
