@@ -8,6 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/joho/godotenv"
+	"github.com/stripe/stripe-go/v76"
 	"github.com/yura4ka/vydelka/db"
 	"github.com/yura4ka/vydelka/middleware"
 	"github.com/yura4ka/vydelka/router"
@@ -41,6 +42,7 @@ func main() {
 	}))
 	app.Use(middleware.ParseLanguage)
 
+	stripe.Key = os.Getenv("STRIPE_SECRET")
 	db.Connect()
 	router.SetupRouter(app)
 	services.SetupValidator()
