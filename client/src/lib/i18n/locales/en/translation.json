@@ -106,5 +106,37 @@
     "pay": "Proceed to payment",
     "items": "Items",
     "edit-items": "Edit items"
+  },
+  "order": {
+    "thanks": "Thank you!",
+    "confirmed": "The order has been successfully confirmed",
+    "order-payed": "The payment for your order has been successfully provided",
+    "pay-canceled": {
+      "title": "The payment has been canceled!",
+      "description": "Please provide a payment within 24 hours or cancel the order"
+    },
+    "order-canceled": "Your order has been canceled",
+    "number": "Order",
+    "date": "Date",
+    "status": {
+      "status": "Status",
+      "processing": "Processing",
+      "confirmed": "Confirmed",
+      "received": "Received",
+      "expired": "Expired",
+      "canceled": "Canceled"
+    },
+    "items-total-title": "Order",
+    "items-total_one": "{{count}} item for {{sum}} total",
+    "items-total_other": "{{count}} items for {{sum}} total",
+    "payment": {
+      "payed": "Payed",
+      "receive": "Upon receive",
+      "pending": "Pending for payment"
+    },
+    "actions": "Actions",
+    "pay": "Pay",
+    "cancel": "Cancel",
+    "more": "More"
   }
 }

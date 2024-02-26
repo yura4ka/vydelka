@@ -40,5 +40,6 @@ export const api = createApi({
     "CategoryFilters",
     "Products",
     "Reviews",
+    "Orders",
   ],
 });

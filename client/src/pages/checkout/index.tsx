@@ -67,7 +67,7 @@ export const CheckoutPage = () => {
         address: address.length === 0 ? undefined : address,
       }).unwrap();
       if (form.paymentType === "pay_now") window.location.replace(url);
-      else navigate("/orders?success");
+      else navigate("/orders?confirmed");
     } catch {
       onError();
     }
@@ -76,7 +76,7 @@ export const CheckoutPage = () => {
   const total = useMemo(() => {
     return (
       data?.products.reduce(
-        (acc, p) => acc + p.price * entities[p.id]?.count ?? 1,
+        (acc, p) => acc + p.price * (entities[p.id]?.count ?? 1),
         0,
       ) ?? 0
     );
@@ -85,9 +85,25 @@ export const CheckoutPage = () => {
   const isWrongDelivery =
     form.deliveryType === "delivery" && form.address.trim().length === 0;
 
+  if (ids.length === 0) {
+    return (
+      <main className="grid content-center justify-items-center">
+        <div className="h-fit w-full max-w-sm space-y-8 rounded-lg bg-card p-4 text-card-foreground sm:border sm:px-6">
+          <h1 className="text-center text-2xl font-semibold tracking-tight">
+            {t("checkout.checkout")}
+          </h1>
+          <p className="text-center text-2xl font-bold">{t("cart.empty")}</p>
+          <Button asChild className="w-full">
+            <Link to={"/"}>{t("cart.continue")}</Link>
+          </Button>
+        </div>
+      </main>
+    );
+  }
+
   return (
-    <main className="container grid content-start justify-center gap-x-4 p-0 sm:gap-y-16 sm:p-4 lg:grid-cols-[60%_1fr]">
-      <div className="top-[4.6rem] h-fit w-full max-w-screen-sm rounded-lg bg-card text-card-foreground sm:border lg:sticky">
+    <main className="container grid content-start justify-center gap-x-8 p-0 sm:gap-y-16 sm:p-4 lg:grid-cols-[60%_1fr]">
+      <div className="top-[4.6rem] h-fit w-full rounded-lg bg-card text-card-foreground sm:border lg:sticky">
         <h1 className="px-4 py-6 text-2xl font-semibold tracking-tight sm:p-6">
           {t("checkout.checkout")}
         </h1>
@@ -293,7 +309,7 @@ export const CheckoutPage = () => {
                     {entities[p.id]?.count ?? 1} x {formatMoney(p.price)}
                   </p>
                   <p className="font-medium">
-                    {formatMoney(p.price * entities[p.id]?.count ?? 1)}
+                    {formatMoney(p.price * (entities[p.id]?.count ?? 1))}
                   </p>
                 </div>
               </div>

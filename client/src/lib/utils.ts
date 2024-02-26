@@ -47,8 +47,14 @@ export const PRODUCTS_ORDER_BY = [
   "expensive",
 ] as const;
 
-export function formatStringDate(date: string) {
+export function formatStringDate(date: string, short = false) {
   const locale = i18next.resolvedLanguage ?? "en";
+  if (short) {
+    return new Intl.DateTimeFormat(locale, {
+      dateStyle: "short",
+    }).format(new Date(date));
+  }
+
   return new Intl.DateTimeFormat(locale, {
     year: "numeric",
     month: "short",

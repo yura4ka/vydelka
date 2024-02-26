@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"log"
 	"os"
 
@@ -29,6 +30,42 @@ func CreateOrder(c *fiber.Ctx) error {
 	})
 }
 
+func CancelOrder(c *fiber.Ctx) error {
+	id := c.Params("id")
+	userId := c.Locals("userId").(string)
+	err := services.CancelOrder(id, userId)
+	if err != nil {
+		if errors.Is(err, services.ErrCantCancel) {
+			return c.SendStatus(400)
+		}
+		return c.SendStatus(500)
+	}
+	return c.JSON(fiber.Map{
+		"message": "Ok",
+	})
+}
+
+func GetOrders(c *fiber.Ctx) error {
+	userId := c.Locals("userId").(string)
+	page := c.QueryInt("page", 1)
+
+	orders, err := services.GetOrders(userId, page)
+	if err != nil {
+		return c.SendStatus(500)
+	}
+
+	hasMore, totalPages, err := services.HasMoreOrders(userId, page)
+	if err != nil {
+		return c.SendStatus(500)
+	}
+
+	return c.JSON(fiber.Map{
+		"hasMore":    hasMore,
+		"totalPages": totalPages,
+		"orders":     orders,
+	})
+}
+
 func HandleWebhook(c *fiber.Ctx) error {
 	payload := c.Body()
 	sigHeader := c.Get("Stripe-Signature")
@@ -44,6 +81,14 @@ func HandleWebhook(c *fiber.Ctx) error {
 		metadata := session["metadata"].(map[string]interface{})
 		orderId := metadata["orderId"].(string)
 		err := services.ConfirmOrder(orderId)
+		if err != nil {
+			return c.SendStatus(500)
+		}
+	case stripe.EventTypeCheckoutSessionExpired:
+		session := event.Data.Object
+		metadata := session["metadata"].(map[string]interface{})
+		orderId := metadata["orderId"].(string)
+		err := services.ExpirePayment(orderId)
 		if err != nil {
 			return c.SendStatus(500)
 		}

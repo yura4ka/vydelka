@@ -59,7 +59,7 @@ export const Pagination = ({ totalPages, page, onChange, hash }: Props) => {
   const generateLink = (page: number) => {
     const searchParams = new URLSearchParams(params);
     searchParams.set("page", page.toString());
-    return `?${searchParams.toString()}#${hash}`;
+    return `?${searchParams.toString()}#${hash ?? ""}`;
   };
 
   if (!range) return null;

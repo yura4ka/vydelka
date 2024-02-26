@@ -25,7 +25,7 @@ export const CartModal = () => {
     return formatMoney(
       data?.products.reduce(
         (acc, product) =>
-          acc + product.price * entities[product.id]?.count ?? 0,
+          acc + product.price * (entities[product.id]?.count ?? 0),
         0,
       ) ?? 0,
     );

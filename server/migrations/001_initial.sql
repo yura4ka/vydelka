@@ -6,6 +6,8 @@ CREATE TYPE delivery_type AS ENUM ('delivery', 'self');
 
 CREATE TYPE pay_type AS ENUM ('pay_now', 'pay_receive');
 
+CREATE TYPE order_status AS ENUM ('processing', 'confirmed', 'received', 'expired', 'canceled');
+
 -- +goose StatementBegin
 CREATE OR REPLACE FUNCTION update_timestamp()
 RETURNS TRIGGER AS $$
@@ -112,6 +114,11 @@ CREATE TABLE orders (
   pay pay_type NOT NULL,
   payment_time TIMESTAMPTZ,
   region TEXT,
+  stripe_session_id TEXT,
+  stripe_url TEXT,
+  status order_status NOT NULL DEFAULT 'processing',
+  payment_expiration_time TIMESTAMPTZ,
+  takeout_expiration_time TIMESTAMPTZ,
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -122,6 +129,9 @@ CHECK (
 	delivery = 'delivery' AND delivery_address IS NOT NULL
 	OR delivery != 'delivery'
 );
+
+ALTER TABLE orders ADD CONSTRAINT payed_not_canceled 
+CHECK (NOT((status = 'expired' OR status = 'canceled') AND payment_time IS NOT NULL));
 
 CREATE TABLE order_content (
   order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
@@ -150,6 +160,7 @@ EXECUTE PROCEDURE update_timestamp();
 DROP TYPE IF EXISTS language_type CASCADE;
 DROP TYPE IF EXISTS delivery_type CASCADE;
 DROP TYPE IF EXISTS pay_type CASCADE;
+DROP TYPE IF EXISTS order_status CASCADE;
 
 DROP FUNCTION IF EXISTS on_post_change CASCADE;
 DROP FUNCTION IF EXISTS generate_tsvector CASCADE;

@@ -6,6 +6,7 @@ import { AdminCategories } from "./pages/admin";
 import { CategoryPage } from "./pages/categories";
 import { ProductPage } from "./pages/products";
 import { CheckoutPage } from "./pages/checkout";
+import { OrdersPage } from "./pages/orders";
 
 const router = createBrowserRouter([
   {
@@ -17,6 +18,7 @@ const router = createBrowserRouter([
       { path: "/:slug", element: <CategoryPage /> },
       { path: "/p/:slug", element: <ProductPage /> },
       { path: "/checkout", element: <CheckoutPage /> },
+      { path: "/orders", element: <OrdersPage /> },
       {
         path: "auth",
         children: [
