@@ -68,3 +68,12 @@ func SliceContains[T comparable](arr []T, value T) bool {
 	}
 	return false
 }
+
+func AppendIfNotNil(arr []any, values ...*string) []any {
+	for _, v := range values {
+		if v != nil {
+			arr = append(arr, v)
+		}
+	}
+	return arr
+}

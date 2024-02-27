@@ -3,23 +3,23 @@ import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { authApi } from "./authApiSlice";
 import { setCredentials } from "./actions";
 
-export interface User {
+export type User = {
   id: string;
   firstName: string;
   lastName: string;
   email: string;
   phoneNumber: string;
   isAdmin: boolean;
-}
+};
 
-export interface AuthState {
+export type AuthState = {
   user?: User | null;
   token?: string;
   ucareToken?: {
     signature: string;
     expire: number;
   };
-}
+};
 
 const initialState: AuthState = {};
 

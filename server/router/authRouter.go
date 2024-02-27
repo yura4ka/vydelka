@@ -9,6 +9,7 @@ import (
 func addAuthRouter(app *fiber.App) {
 	auth := app.Group("auth")
 
+	auth.Patch("/user", middleware.RequireAuth, handlers.PatchUser)
 	auth.Post("/register", handlers.Register)
 	auth.Post("/login", handlers.Login)
 	auth.Get("/refresh", handlers.Refresh)

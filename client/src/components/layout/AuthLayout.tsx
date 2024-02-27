@@ -26,5 +26,5 @@ export const AuthLayout: React.FC<Props> = ({ requireAdmin }) => {
     return <Navigate to="/" replace />;
   }
 
-  return <Outlet key={location.key} />;
+  return <Outlet key={requireAdmin ? location.key : undefined} />;
 };

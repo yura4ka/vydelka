@@ -41,7 +41,8 @@
       "description": "At least 4 characters",
       "not-match": "Passwords do not match"
     },
-    "email-or-phone": "Email or Phone Number"
+    "email-or-phone": "Email or Phone Number",
+    "wrong-password": "Wrong password"
   },
   "home": {
     "popular": "Popular products",
@@ -138,5 +139,14 @@
     "pay": "Pay",
     "cancel": "Cancel",
     "more": "More"
+  },
+  "account": {
+    "change": "Change",
+    "data": "Your data",
+    "data-changed": "Your data has been successfully changed",
+    "change-password": "Change your password",
+    "old-password": "Old password",
+    "enter-old": "Enter your old password",
+    "password-changed": "Your password has been successfully changed"
   }
 }

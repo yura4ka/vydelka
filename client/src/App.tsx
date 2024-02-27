@@ -7,6 +7,7 @@ import { CategoryPage } from "./pages/categories";
 import { ProductPage } from "./pages/products";
 import { CheckoutPage } from "./pages/checkout";
 import { OrdersPage } from "./pages/orders";
+import { ProfilePage } from "./pages/profile";
 
 const router = createBrowserRouter([
   {
@@ -18,7 +19,13 @@ const router = createBrowserRouter([
       { path: "/:slug", element: <CategoryPage /> },
       { path: "/p/:slug", element: <ProductPage /> },
       { path: "/checkout", element: <CheckoutPage /> },
-      { path: "/orders", element: <OrdersPage /> },
+      {
+        element: <AuthLayout />,
+        children: [
+          { path: "/orders", element: <OrdersPage /> },
+          { path: "/profile", element: <ProfilePage /> },
+        ],
+      },
       {
         path: "auth",
         children: [

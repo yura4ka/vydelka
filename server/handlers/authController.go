@@ -1,11 +1,10 @@
 package handlers
 
 import (
-	"log"
+	"errors"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/yura4ka/vydelka/services"
-	"golang.org/x/crypto/bcrypt"
 )
 
 func Register(c *fiber.Ctx) error {
@@ -62,7 +61,7 @@ func Login(c *fiber.Ctx) error {
 		}
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)); err != nil {
+	if err := services.CompareHashAndPassword(user.Password, input.Password); err != nil {
 		return &fiber.Error{
 			Code:    400,
 			Message: "Wrong password",
@@ -130,8 +129,6 @@ func CheckEmail(c *fiber.Ctx) error {
 		return c.SendStatus(200)
 	}
 
-	log.Print(u)
-
 	userId, _ := c.Locals("userId").(string)
 	if userId == u.Id {
 		return c.SendStatus(200)
@@ -169,4 +166,24 @@ func CheckPhoneNumber(c *fiber.Ctx) error {
 func Logout(c *fiber.Ctx) error {
 	c.Cookie(services.ClearRefreshCookie())
 	return c.SendStatus(200)
+}
+
+func PatchUser(c *fiber.Ctx) error {
+	input := new(services.TChangeUser)
+	if err := services.ValidateJSON(c, input); err != nil {
+		return err
+	}
+
+	userId := c.Locals("userId").(string)
+	err := services.ChangeUser(userId, input)
+	if err != nil {
+		if errors.Is(err, services.ErrWrongPassword) {
+			return fiber.ErrBadRequest
+		}
+		return fiber.ErrInternalServerError
+	}
+
+	return c.JSON(fiber.Map{
+		"message": "Ok",
+	})
 }
