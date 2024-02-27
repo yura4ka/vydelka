@@ -1,6 +1,9 @@
 import { useGetCategoriesQuery } from "@/features/categories/categoriesApiSlice";
 import { ProductCard } from "@/features/products/components/ProductCard";
-import { useGetPopularProductsQuery } from "@/features/products/productsApiSlice";
+import {
+  useGetPopularProductsQuery,
+  useGetRecentProductsQuery,
+} from "@/features/products/productsApiSlice";
 import { Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
@@ -67,10 +70,18 @@ const PopularProductsSection = () => {
 
 const RecentProductsSection = () => {
   const { t } = useTranslation();
+  const { data } = useGetRecentProductsQuery();
+
+  if (!data || data.length === 0) return null;
 
   return (
-    <section className="container px-4 py-8">
+    <section className="container space-y-8 px-4 py-8">
       <h1 className="text-2xl font-bold tracking-tight">{t("home.recent")}</h1>
+      <div className="scrollbar grid snap-x snap-mandatory auto-cols-[50%] grid-flow-col gap-8 overflow-x-scroll overscroll-x-contain pb-4 sm:auto-cols-[20%]">
+        {data.map((p) => (
+          <ProductCard key={p.id} product={p} className="min-w-0 snap-start" />
+        ))}
+      </div>
     </section>
   );
 };

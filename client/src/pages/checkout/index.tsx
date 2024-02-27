@@ -197,7 +197,7 @@ export const CheckoutPage = () => {
                   <RadioGroupItem value="delivery" id="delivery" />
                   <Label
                     htmlFor="delivery"
-                    className="space-y-4 group-has-[:checked]:w-full"
+                    className="w-full space-y-4 group-has-[:checked]:w-full"
                   >
                     <p>{t("checkout.delivery")}</p>
                     <div className="hidden group-has-[:checked]:block">
@@ -213,7 +213,9 @@ export const CheckoutPage = () => {
                 </div>
                 <div className="flex space-x-2 rounded p-4 ring-border has-[:checked]:ring-1">
                   <RadioGroupItem value="self" id="self" />
-                  <Label htmlFor="self">{t("checkout.takeout")}</Label>
+                  <Label htmlFor="self" className="w-full">
+                    {t("checkout.takeout")}
+                  </Label>
                 </div>
               </RadioGroup>
               <Button disabled={isWrongDelivery} className="mt-4">

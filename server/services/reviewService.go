@@ -27,13 +27,17 @@ func GetReviews(productId string, page int) ([]Review, error) {
 		SELECT r.id, r.created_at, r.updated_at, r.content, r.rating, r.product_id,
 			u.id AS user_id,
 			(u.first_name || ' ' || u.last_name) AS username,
-			CASE WHEN COUNT(o.*) > 0 THEN TRUE ELSE FALSE END is_verified
+			o.id IS NOT NULL is_verified
 		FROM reviews AS r
 		LEFT JOIN users AS u ON r.user_id = u.id
-		LEFT JOIN order_content AS oc ON r.product_id = oc.product_id
-		LEFT JOIN orders AS o ON oc.order_id = o.id AND u.id = o.user_id
+		LEFT JOIN LATERAL (
+			SELECT o.id
+			FROM order_content AS oc
+			LEFT JOIN orders AS o ON oc.order_id = o.id AND u.id = o.user_id
+			WHERE r.product_id = $1 AND o.status != 'canceled'
+			LIMIT 1
+		) o ON TRUE
 		WHERE r.product_id = $1
-		GROUP BY r.id, u.id
 		ORDER BY r.created_at DESC
 		LIMIT $2 OFFSET $3;
 	`, productId, REVIEWS_PER_PAGE, (page-1)*REVIEWS_PER_PAGE)

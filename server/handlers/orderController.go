@@ -18,9 +18,10 @@ func CreateOrder(c *fiber.Ctx) error {
 	}
 
 	userId := c.Locals("userId").(string)
+	location := c.Locals("location").(string)
 	lang := c.Locals("lang").(services.Language)
 
-	url, err := services.CreateOrder(input, userId, lang)
+	url, err := services.CreateOrder(input, userId, location, lang)
 	if err != nil {
 		return fiber.ErrInternalServerError
 	}

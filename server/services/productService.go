@@ -475,7 +475,7 @@ func GetPopularProducts(category string, lang Language) ([]Product, error) {
 			FROM reviews
 			WHERE product_id = p.id
 		) r ON TRUE
-		GROUP BY p.id, pt.title, pt.description, r.rating, r,cnt
+		GROUP BY p.id, pt.title, pt.description, r.rating, r.cnt
 		ORDER BY popularity DESC, rating DESC
 		LIMIT 12;
 	`))
@@ -543,5 +543,46 @@ func GetProductRoute(slug string, lang Language) ([]CategoryRoute, error) {
 	result, err := GetCategoryRoute(product.Category, lang)
 	result = append(result, CategoryRoute{product.Title, slug})
 
+	return result, err
+}
+
+func GetRecentProducts(location *string, lang Language) ([]Product, error) {
+	result := make([]Product, 0)
+	tmpl := template.Must(template.New("recentProducts").Parse(`
+		SELECT p.id, p.slug, p.price, pt.title, '' AS description,
+			json_agg(DISTINCT jsonb_build_object(
+				'id', pi.id, 'imageUrl', pi.image_url, 'width', pi.width, 'height', pi.height
+			)) AS images,
+			COALESCE(r.rating, 0) AS rating, r.cnt AS reviews
+		FROM (
+			SELECT DISTINCT ON (c.product_id)
+			c.product_id, o.created_at
+			FROM orders AS o
+			LEFT JOIN order_content AS c ON o.id = c.order_id
+			WHERE o.status != 'canceled'
+			{{if not (eq . nil)}} AND o.region = $2 {{end}}
+			ORDER BY c.product_id, o.created_at DESC
+		) c
+		LEFT JOIN products AS p ON c.product_id = p.id
+		LEFT JOIN product_translations AS pt ON p.id = pt.product_id AND lang = $1
+		LEFT JOIN product_images AS pi ON p.id = pi.product_id
+		LEFT JOIN LATERAL (
+			SELECT COUNT(*) AS cnt, AVG(rating) AS rating
+			FROM reviews
+			WHERE product_id = p.id
+		) r ON TRUE
+		GROUP BY p.id, p.slug, p.price, pt.title, pt.description, r.rating, r.cnt, c.created_at
+		ORDER BY c.created_at DESC
+		LIMIT 12;
+	`))
+
+	query := ExecuteTemplate(tmpl, location)
+	args := make([]any, 0)
+	args = append(args, lang)
+	if location != nil {
+		args = append(args, location)
+	}
+
+	err := pgxscan.Select(db.Ctx, db.Client, &result, query, args...)
 	return result, err
 }

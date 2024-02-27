@@ -11,6 +11,7 @@ func addProductRouter(app *fiber.App) {
 
 	product.Get("/", handlers.GetProducts)
 	product.Get("/popular", handlers.GetPopularProducts)
+	product.Get("/recent", middleware.ParseLocation, handlers.GetRecentProducts)
 	product.Get("/:product", handlers.GetProductBySlug)
 	product.Get("/:product/route", handlers.GetProductRoute)
 	product.Post("/", middleware.RequireAdmin, handlers.CreateProduct)

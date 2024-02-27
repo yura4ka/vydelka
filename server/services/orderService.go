@@ -54,7 +54,7 @@ type NewOrder struct {
 	Products     []OrderProduct `json:"products" validate:"required,min=1,max=100"`
 }
 
-func CreateOrder(order *NewOrder, userId string, lang Language) (string, error) {
+func CreateOrder(order *NewOrder, userId, location string, lang Language) (string, error) {
 	tx, err := db.Client.Begin(db.Ctx)
 	if err != nil {
 		return "", err
@@ -63,10 +63,10 @@ func CreateOrder(order *NewOrder, userId string, lang Language) (string, error) 
 
 	var id string
 	err = pgxscan.Get(db.Ctx, tx, &id, `
-		INSERT INTO orders (delivery, delivery_address, pay, user_id)
-		VALUES ($1, $2, $3, $4)
+		INSERT INTO orders (delivery, delivery_address, pay, user_id, region)
+		VALUES ($1, $2, $3, $4, $5)
 		RETURNING id;
-	`, order.DeliveryType, order.Address, order.PaymentType, userId)
+	`, order.DeliveryType, order.Address, order.PaymentType, userId, location)
 	if err != nil {
 		return "", err
 	}
@@ -157,9 +157,8 @@ func createStripeSession(order *NewOrder, userId string, lang Language) (*stripe
 		Metadata: map[string]string{
 			"orderId": order.Id,
 		},
-		SuccessURL:       stripe.String(os.Getenv("CLIENT_ADDR") + "/orders?success"),
-		CancelURL:        stripe.String(os.Getenv("CLIENT_ADDR") + "/orders?canceled"),
-		CustomerCreation: stripe.String(string(stripe.CheckoutSessionCustomerCreationAlways)),
+		SuccessURL: stripe.String(os.Getenv("CLIENT_ADDR") + "/orders?success"),
+		CancelURL:  stripe.String(os.Getenv("CLIENT_ADDR") + "/orders?canceled"),
 	}
 
 	s, err := session.New(params)

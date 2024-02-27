@@ -207,3 +207,22 @@ func DeleteReview(c *fiber.Ctx) error {
 		"message": "Ok",
 	})
 }
+
+func GetRecentProducts(c *fiber.Ctx) error {
+	location := c.Locals("location").(string)
+	lang := c.Locals("lang").(services.Language)
+
+	result, err := services.GetRecentProducts(&location, lang)
+	if err != nil {
+		return fiber.ErrInternalServerError
+	}
+
+	if len(result) == 0 {
+		result, err = services.GetRecentProducts(nil, lang)
+		if err != nil {
+			return fiber.ErrInternalServerError
+		}
+	}
+
+	return c.JSON(result)
+}

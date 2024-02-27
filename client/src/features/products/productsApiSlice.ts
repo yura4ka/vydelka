@@ -258,6 +258,23 @@ export const productApi = api.injectEndpoints({
         { type: "Reviews", id: reviewId, productId },
       ],
     }),
+
+    getRecentProducts: builder.query<Product[], void>({
+      query: () => ({ url: `product/recent` }),
+      transformResponse: (
+        response: ProductsResponseNonTransformed["products"],
+      ) => response.map((p) => ({ ...p, filters: new Map() })),
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map((p) => ({
+                type: "Products" as const,
+                id: p.id,
+              })),
+              { type: "Products", id: "LIST" },
+            ]
+          : [{ type: "Products", id: "LIST" }],
+    }),
   }),
 });
 
@@ -273,4 +290,5 @@ export const {
   useCreateReviewMutation,
   useChangeReviewMutation,
   useDeleteReviewMutation,
+  useGetRecentProductsQuery,
 } = productApi;
