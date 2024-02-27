@@ -22,7 +22,7 @@ func CreateOrder(c *fiber.Ctx) error {
 
 	url, err := services.CreateOrder(input, userId, lang)
 	if err != nil {
-		return c.SendStatus(500)
+		return fiber.ErrInternalServerError
 	}
 
 	return c.JSON(fiber.Map{
@@ -36,9 +36,9 @@ func CancelOrder(c *fiber.Ctx) error {
 	err := services.CancelOrder(id, userId)
 	if err != nil {
 		if errors.Is(err, services.ErrCantCancel) {
-			return c.SendStatus(400)
+			return fiber.ErrBadRequest
 		}
-		return c.SendStatus(500)
+		return fiber.ErrInternalServerError
 	}
 	return c.JSON(fiber.Map{
 		"message": "Ok",
@@ -51,12 +51,12 @@ func GetOrders(c *fiber.Ctx) error {
 
 	orders, err := services.GetOrders(userId, page)
 	if err != nil {
-		return c.SendStatus(500)
+		return fiber.ErrInternalServerError
 	}
 
 	hasMore, totalPages, err := services.HasMoreOrders(userId, page)
 	if err != nil {
-		return c.SendStatus(500)
+		return fiber.ErrInternalServerError
 	}
 
 	return c.JSON(fiber.Map{
@@ -72,7 +72,7 @@ func HandleWebhook(c *fiber.Ctx) error {
 	endpointSecret := os.Getenv("STRIPE_WEBHOOK")
 	event, err := webhook.ConstructEvent(payload, sigHeader, endpointSecret)
 	if err != nil {
-		return c.SendStatus(400)
+		return fiber.ErrBadRequest
 	}
 
 	switch event.Type {
@@ -82,7 +82,7 @@ func HandleWebhook(c *fiber.Ctx) error {
 		orderId := metadata["orderId"].(string)
 		err := services.ConfirmOrder(orderId)
 		if err != nil {
-			return c.SendStatus(500)
+			return fiber.ErrInternalServerError
 		}
 	case stripe.EventTypeCheckoutSessionExpired:
 		session := event.Data.Object
@@ -90,7 +90,7 @@ func HandleWebhook(c *fiber.Ctx) error {
 		orderId := metadata["orderId"].(string)
 		err := services.ExpirePayment(orderId)
 		if err != nil {
-			return c.SendStatus(500)
+			return fiber.ErrInternalServerError
 		}
 	default:
 		log.Printf("Unhandled event type: %v\n", event.Type)

@@ -33,12 +33,12 @@ func GetProducts(c *fiber.Ctx) error {
 
 	products, err := services.GetProducts(request)
 	if err != nil {
-		return c.SendStatus(500)
+		return fiber.ErrInternalServerError
 	}
 
 	hasMore, total, err := services.HasMoreProducts(request)
 	if err != nil {
-		return c.SendStatus(500)
+		return fiber.ErrInternalServerError
 	}
 
 	return c.JSON(fiber.Map{
@@ -59,7 +59,7 @@ func CreateProduct(c *fiber.Ctx) error {
 		if err := services.IsUniqueViolation(err); err != nil {
 			return err
 		}
-		return c.SendStatus(500)
+		return fiber.ErrInternalServerError
 	}
 
 	return c.JSON(fiber.Map{
@@ -78,7 +78,7 @@ func ChangeProduct(c *fiber.Ctx) error {
 		if err := services.IsUniqueViolation(err); err != nil {
 			return err
 		}
-		return c.SendStatus(500)
+		return fiber.ErrInternalServerError
 	}
 
 	return c.JSON(fiber.Map{
@@ -89,7 +89,7 @@ func ChangeProduct(c *fiber.Ctx) error {
 func DeleteProduct(c *fiber.Ctx) error {
 	id := c.Params("id")
 	if err := services.DeleteProduct(id); err != nil {
-		return c.SendStatus(500)
+		return fiber.ErrInternalServerError
 	}
 	return c.JSON(fiber.Map{
 		"message": "Ok",
@@ -102,7 +102,7 @@ func GetPopularProducts(c *fiber.Ctx) error {
 
 	result, err := services.GetPopularProducts(category, lang)
 	if err != nil {
-		return c.SendStatus(500)
+		return fiber.ErrInternalServerError
 	}
 
 	return c.JSON(result)
@@ -114,10 +114,10 @@ func GetProductBySlug(c *fiber.Ctx) error {
 
 	product, err := services.GetProductBySlug(slug, lang)
 	if err != nil {
-		return c.SendStatus(500)
+		return fiber.ErrInternalServerError
 	}
 	if product == nil {
-		return c.SendStatus(400)
+		return fiber.ErrNotFound
 	}
 
 	return c.JSON(product)
@@ -129,7 +129,7 @@ func GetProductRoute(c *fiber.Ctx) error {
 
 	routes, err := services.GetProductRoute(slug, lang)
 	if err != nil {
-		return c.SendStatus(500)
+		return fiber.ErrInternalServerError
 	}
 
 	return c.JSON(routes)
@@ -141,12 +141,12 @@ func GetReviews(c *fiber.Ctx) error {
 
 	reviews, err := services.GetReviews(id, page)
 	if err != nil {
-		return c.SendStatus(500)
+		return fiber.ErrInternalServerError
 	}
 
 	hasMore, totalPages, err := services.HasMoreReviews(id, page)
 	if err != nil {
-		return c.SendStatus(500)
+		return fiber.ErrInternalServerError
 	}
 
 	return c.JSON(fiber.Map{
@@ -166,7 +166,7 @@ func CreateReview(c *fiber.Ctx) error {
 
 	reviewId, err := services.CreateReview(userId, id, input)
 	if err != nil {
-		return c.SendStatus(500)
+		return fiber.ErrInternalServerError
 	}
 
 	return c.JSON(reviewId)
@@ -183,7 +183,7 @@ func ChangeReview(c *fiber.Ctx) error {
 
 	err := services.ChangeReview(userId, id, reviewId, input)
 	if err != nil {
-		return c.SendStatus(500)
+		return fiber.ErrInternalServerError
 	}
 
 	return c.JSON(fiber.Map{
@@ -198,7 +198,7 @@ func DeleteReview(c *fiber.Ctx) error {
 
 	err := services.DeleteReview(userId, id, reviewId)
 	if err != nil {
-		return c.SendStatus(500)
+		return fiber.ErrInternalServerError
 	}
 
 	return c.JSON(fiber.Map{

@@ -11,7 +11,13 @@ import {
 import { User } from "@/features/auth/authSlice";
 import { useAuth } from "@/features/auth/useAuth";
 import { useDebounce } from "@/hooks";
-import { emailRegex, passwordRegex, phoneRegex } from "@/lib/utils";
+import {
+  createErrorToast,
+  emailRegex,
+  isFetchQueryError,
+  passwordRegex,
+  phoneRegex,
+} from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -68,11 +74,7 @@ const UserForm = ({ user }: { user: User }) => {
         description: t("account.data-changed"),
       });
     } catch {
-      toast({
-        variant: "destructive",
-        title: t("error.something-wrong"),
-        description: t("error.try-again"),
-      });
+      toast(createErrorToast());
     }
   };
 
@@ -170,12 +172,14 @@ const ChangePasswordForm = () => {
       });
       setForm({ newPassword: "", oldPassword: "" });
       setIsError(true);
-    } catch {
-      toast({
-        variant: "destructive",
-        title: t("error.something-wrong"),
-        description: "error.try-again",
-      });
+    } catch (e) {
+      if (isFetchQueryError(e)) {
+        if (e.status === 400)
+          toast(createErrorToast(t("auth.wrong-password"), null));
+        else toast(createErrorToast());
+        return;
+      }
+      toast(createErrorToast());
     }
   };
 

@@ -18,7 +18,7 @@ type Props = React.HTMLAttributes<HTMLDivElement> & {
   review: Review;
   onEditSuccess?: () => void;
   onDelete?: () => void;
-  onError?: (msg: string) => void;
+  onError?: () => void;
 };
 
 export const ReviewCard: React.FC<Props> = ({
@@ -36,8 +36,9 @@ export const ReviewCard: React.FC<Props> = ({
   const [deleteReview] = useDeleteReviewMutation();
   const handleDelete = () => {
     deleteReview({ productId: review.productId, reviewId: review.id })
+      .unwrap()
       .then(onDelete)
-      .catch((e) => onError?.(e.data.message));
+      .catch(() => onError?.());
   };
 
   return (

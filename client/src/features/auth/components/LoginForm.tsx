@@ -1,5 +1,5 @@
 import { CustomInput } from "@/components/CustomInput";
-import { cn } from "@/lib/utils";
+import { cn, createErrorToast, isFetchQueryError } from "@/lib/utils";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLoginMutation } from "../authApiSlice";
@@ -36,17 +36,15 @@ export const LoginForm = ({ className, onSuccess, ...rest }: Props) => {
     try {
       const result = await login(form).unwrap();
       onSuccess?.(result);
-    } catch {
-      toast({
-        variant: "destructive",
-        title: t("error.something-wrong"),
-        description: t("error.try-again"),
-      });
+    } catch (e) {
+      if (isFetchQueryError(e) && e.status === 400)
+        toast(createErrorToast(t("auth.wrong-all"), null));
+      else toast(createErrorToast());
     }
   };
 
   return (
-    <Card className={cn("w-full max-w-[420px]", className)}>
+    <Card className={cn("w-full", className)}>
       <CardHeader className="px-4 sm:px-6">
         <CardTitle>{t("auth.sign-in")}</CardTitle>
         <CardDescription>

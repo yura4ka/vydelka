@@ -11,8 +11,9 @@ export const SignUp = () => {
   }
 
   return (
-    <main className="container flex items-center justify-center">
+    <main className="flex items-center justify-center py-4">
       <RegisterForm
+        className="border-0 shadow-none sm:border sm:shadow"
         onSuccess={() => navigate("/")}
         onError={() => navigate("/auth/sign-in")}
       />

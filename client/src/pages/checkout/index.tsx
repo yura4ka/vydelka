@@ -5,7 +5,7 @@ import { LoginForm } from "@/features/auth/components/LoginForm";
 import { useAuth } from "@/features/auth/useAuth";
 import { useCart } from "@/features/cart";
 import { useGetProductsQuery } from "@/features/products/productsApiSlice";
-import { cn, formatMoney } from "@/lib/utils";
+import { cn, createErrorToast, formatMoney } from "@/lib/utils";
 import { useAppSelector } from "@/app/hooks";
 import { CustomInput } from "@/components/CustomInput";
 import { Button } from "@/components/ui/button";
@@ -50,10 +50,7 @@ export const CheckoutPage = () => {
   };
 
   const onError = () => {
-    toast({
-      title: t("error.something-wrong"),
-      description: t("error.try-again"),
-    });
+    toast(createErrorToast());
   };
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {

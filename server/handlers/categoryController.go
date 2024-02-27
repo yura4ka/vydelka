@@ -15,7 +15,7 @@ func GetCategories(c *fiber.Ctx) error {
 
 	categories, err := services.GetCategories(parentId, lang)
 	if err != nil {
-		return c.SendStatus(500)
+		return fiber.ErrInternalServerError
 	}
 
 	return c.JSON(categories)
@@ -32,7 +32,7 @@ func CreateCategory(c *fiber.Ctx) error {
 		if err := services.IsUniqueViolation(err); err != nil {
 			return err
 		}
-		return c.SendStatus(500)
+		return fiber.ErrInternalServerError
 	}
 
 	return c.JSON(fiber.Map{
@@ -53,7 +53,7 @@ func GetCategory(c *fiber.Ctx) error {
 	}
 
 	if err != nil {
-		return c.SendStatus(500)
+		return fiber.ErrInternalServerError
 	}
 	if result == nil {
 		return &fiber.Error{
@@ -75,7 +75,7 @@ func ChangeCategory(c *fiber.Ctx) error {
 		if err := services.IsUniqueViolation(err); err != nil {
 			return err
 		}
-		return c.SendStatus(500)
+		return fiber.ErrInternalServerError
 	}
 
 	return c.JSON(fiber.Map{
@@ -90,7 +90,7 @@ func GetFilters(c *fiber.Ctx) error {
 
 	filters, err := services.GetFilters(id, withTranslations, lang)
 	if err != nil {
-		return c.SendStatus(500)
+		return fiber.ErrInternalServerError
 	}
 
 	return c.JSON(filters)
@@ -108,7 +108,7 @@ func CreateFilter(c *fiber.Ctx) error {
 		if err := services.IsUniqueViolation(err); err != nil {
 			return err
 		}
-		return c.SendStatus(500)
+		return fiber.ErrInternalServerError
 	}
 
 	return c.JSON(fiber.Map{
@@ -128,7 +128,7 @@ func CreateFilterVariant(c *fiber.Ctx) error {
 		if err := services.IsUniqueViolation(err); err != nil {
 			return err
 		}
-		return c.SendStatus(500)
+		return fiber.ErrInternalServerError
 	}
 
 	return c.JSON(fiber.Map{
@@ -147,7 +147,7 @@ func ChangeFilter(c *fiber.Ctx) error {
 		if err := services.IsUniqueViolation(err); err != nil {
 			return err
 		}
-		return c.SendStatus(500)
+		return fiber.ErrInternalServerError
 	}
 
 	return c.JSON(fiber.Map{
@@ -166,7 +166,7 @@ func ChangeFilterVariant(c *fiber.Ctx) error {
 		if err := services.IsUniqueViolation(err); err != nil {
 			return err
 		}
-		return c.SendStatus(500)
+		return fiber.ErrInternalServerError
 	}
 
 	return c.JSON(fiber.Map{
@@ -179,7 +179,7 @@ func DeleteFilter(c *fiber.Ctx) error {
 
 	err := services.DeleteFilter(id)
 	if err != nil {
-		return c.SendStatus(500)
+		return fiber.ErrInternalServerError
 	}
 
 	return c.JSON(fiber.Map{
@@ -192,7 +192,7 @@ func DeleteFilterVariant(c *fiber.Ctx) error {
 
 	err := services.DeleteFilterVariant(id)
 	if err != nil {
-		return c.SendStatus(500)
+		return fiber.ErrInternalServerError
 	}
 
 	return c.JSON(fiber.Map{
@@ -206,7 +206,7 @@ func GetNavigationCategories(c *fiber.Ctx) error {
 
 	categories, err := services.GetNavigationCategories(lang, category)
 	if err != nil {
-		return c.SendStatus(500)
+		return fiber.ErrInternalServerError
 	}
 
 	return c.JSON(categories)
@@ -218,7 +218,7 @@ func GetCategoryRoute(c *fiber.Ctx) error {
 
 	result, err := services.GetCategoryRoute(category, lang)
 	if err != nil {
-		return c.SendStatus(500)
+		return fiber.ErrInternalServerError
 	}
 
 	return c.JSON(result)

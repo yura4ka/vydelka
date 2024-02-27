@@ -13,7 +13,7 @@ import {
   useGetProductRouteQuery,
   useGetReviewsQuery,
 } from "@/features/products/productsApiSlice";
-import { cn, formatMoney } from "@/lib/utils";
+import { cn, createErrorToast, formatMoney } from "@/lib/utils";
 import { Loader2, ShoppingBag, ShoppingCart, Star } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link, Navigate, useParams, useSearchParams } from "react-router-dom";
@@ -40,10 +40,7 @@ export const ProductPage = () => {
 
   const { toast } = useToast();
   const onFormError = () => {
-    toast({
-      title: t("error.something-wrong"),
-      description: t("error.try-again"),
-    });
+    toast(createErrorToast());
   };
 
   const onReviewCreated = () => {

@@ -13,7 +13,7 @@ import {
   UploaderPreview,
 } from "@/components/FileUploader";
 import { SubmitButton } from "@/components/SubmitButton";
-import { cn } from "@/lib/utils";
+import { cn, isFetchQueryError } from "@/lib/utils";
 
 const initialForm = (initialData?: ChangeCategory) => ({
   slug: initialData?.slug ?? "",
@@ -27,7 +27,7 @@ type Props = {
   initialData?: ChangeCategory;
   parentId?: string;
   onSuccess?: () => void;
-  onError?: (msg: string) => void;
+  onError?: (msg?: string) => void;
 };
 
 export const CategoryForm: React.FC<Props> = ({
@@ -66,16 +66,17 @@ export const CategoryForm: React.FC<Props> = ({
     const request = initialData
       ? changeCategory({ ...data, id: initialData.id })
       : createCategory({ ...data, parentId });
-    request
-      .unwrap()
-      .then(() => {
-        onSuccess?.();
-        if (!initialData) {
-          setForm(initialForm(initialData));
-          setTranslations(createTranslation());
-        }
-      })
-      .catch((e: { data: { message: string } }) => onError?.(e.data.message));
+    try {
+      await request.unwrap();
+      onSuccess?.();
+      if (!initialData) {
+        setForm(initialForm(initialData));
+        setTranslations(createTranslation());
+      }
+    } catch (e) {
+      if (isFetchQueryError(e)) onError?.(e.data.message);
+      else onError?.();
+    }
   };
 
   return (

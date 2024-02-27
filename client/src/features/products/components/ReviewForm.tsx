@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 type Props = React.FormHTMLAttributes<HTMLFormElement> & {
   productId: string;
   onSuccess?: () => void;
-  onSubmitError?: (msg: string) => void;
+  onSubmitError?: () => void;
   onCancel?: () => void;
   initialData?: Review;
 };
@@ -52,12 +52,13 @@ export const ReviewForm: React.FC<Props> = ({
         })
       : createReview({ productId, content, rating });
     request
+      .unwrap()
       .then(() => {
         onSuccess?.();
         setContent(initialData?.content ?? "");
         setRating(initialData?.rating ?? 5);
       })
-      .catch((e) => onSubmitError?.(e.data.message));
+      .catch(() => onSubmitError?.());
   };
 
   if (!isAuth) {

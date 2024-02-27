@@ -42,6 +42,7 @@
       "not-match": "Passwords do not match"
     },
     "email-or-phone": "Email or Phone Number",
+    "wrong-all": "Wrong email, phone or password",
     "wrong-password": "Wrong password"
   },
   "home": {

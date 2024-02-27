@@ -1,4 +1,4 @@
-import { Fragment, useMemo } from "react";
+import { Fragment, useEffect, useMemo } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Filter, FilterX, Loader2, XCircle } from "lucide-react";
@@ -108,6 +108,12 @@ const ProductSection: React.FC<ProductSectionProps> = ({
 }) => {
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
+
+  const page = +(searchParams.get("page") ?? 1);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [page]);
+
   const { data: filters } = useGetFiltersQuery({ categoryId });
 
   const appliedFilters = useMemo(() => {
@@ -288,7 +294,7 @@ const ProductSection: React.FC<ProductSectionProps> = ({
             <Loader2 className="fixed top-1/2 h-8 w-8 animate-spin" />
           </div>
         )}
-        <Pagination page={1} totalPages={data.totalPages} />
+        <Pagination page={page} totalPages={data.totalPages} />
       </section>
     </div>
   );

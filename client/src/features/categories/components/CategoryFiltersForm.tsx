@@ -24,7 +24,7 @@ import { FC, Fragment, useState } from "react";
 import { Pencil } from "lucide-react";
 import { CustomInput } from "@/components/CustomInput";
 import { SubmitButton } from "@/components/SubmitButton";
-import { cn } from "@/lib/utils";
+import { cn, isFetchQueryError } from "@/lib/utils";
 
 const initialForm = () => ({
   translations: createTranslation(),
@@ -40,7 +40,7 @@ type EditingFilter = {
 type Props = {
   filters: Filter[];
   categoryId: string;
-  onError?: (msg: string) => void;
+  onError?: (msg?: string) => void;
 };
 
 export const CategoryFiltersForm: FC<Props> = ({
@@ -102,10 +102,13 @@ export const CategoryFiltersForm: FC<Props> = ({
         : createVariant(body);
     }
 
-    await request
-      .unwrap()
-      .then(() => setIsModalOpen(false))
-      .catch((e: { data: { message: string } }) => onError?.(e.data.message));
+    try {
+      await request.unwrap();
+      setIsModalOpen(false);
+    } catch (e) {
+      if (isFetchQueryError(e)) onError?.(e.data.message);
+      else onError?.();
+    }
   };
 
   const onDelete = async () => {
@@ -122,7 +125,7 @@ export const CategoryFiltersForm: FC<Props> = ({
     await request
       .unwrap()
       .then(() => setIsModalOpen(false))
-      .catch(() => onError?.("Cannot delete this item"));
+      .catch(() => onError?.());
   };
 
   const translations = Object.entries(form.translations);

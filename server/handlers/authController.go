@@ -15,7 +15,10 @@ func Register(c *fiber.Ctx) error {
 
 	id, err := services.CreateUser(input)
 	if err != nil {
-		return c.SendStatus(400)
+		if err := services.IsUniqueViolation(err); err != nil {
+			return err
+		}
+		return fiber.ErrInternalServerError
 	}
 
 	return c.JSON(fiber.Map{
@@ -25,13 +28,13 @@ func Register(c *fiber.Ctx) error {
 
 func Login(c *fiber.Ctx) error {
 	type Input struct {
-		EmailOrPhone string `json:"emailOrPhone" validate:"required"`
+		EmailOrPhone string `json:"emailOrPhone" validate:"required" mod:"trim"`
 		Password     string `json:"password" validate:"required" mod:"trim"`
 	}
 
 	input := new(Input)
 	if err := services.ValidateJSON(c, input); err != nil {
-		return c.SendStatus(400)
+		return err
 	}
 
 	var user *services.User
@@ -40,12 +43,12 @@ func Login(c *fiber.Ctx) error {
 	if errEmail := services.ValidateVar(input.EmailOrPhone, "email"); errEmail == nil {
 		user, err = services.GetUserByEmail(input.EmailOrPhone)
 		if err != nil {
-			return c.SendStatus(500)
+			return fiber.ErrInternalServerError
 		}
 	} else if errPhone := services.ValidateVar(input.EmailOrPhone, "e164"); errPhone == nil {
 		user, err = services.GetUserByPhoneNumber(input.EmailOrPhone)
 		if err != nil {
-			return c.SendStatus(500)
+			return fiber.ErrInternalServerError
 		}
 	} else {
 		return &fiber.Error{
@@ -71,7 +74,7 @@ func Login(c *fiber.Ctx) error {
 	access, _ := services.CreateAccessToken(services.TokenPayload{Id: user.Id, IsAdmin: user.IsAdmin})
 	refresh, _ := services.CreateRefreshToken(services.TokenPayload{Id: user.Id, IsAdmin: user.IsAdmin})
 	if access == "" || refresh == "" {
-		return c.SendStatus(500)
+		return fiber.ErrInternalServerError
 	}
 
 	var ucareToken *services.UcareToken
@@ -87,19 +90,22 @@ func Refresh(c *fiber.Ctx) error {
 	refresh := c.Cookies("refresh_token")
 	payload, err := services.VerifyRefreshToken(refresh)
 	if err != nil {
-		return c.SendStatus(400)
+		return fiber.ErrBadRequest
 	}
 
 	user, err := services.GetUserById(payload.Id)
 	if err != nil || user == nil {
 		c.Cookie(services.ClearRefreshCookie())
-		return c.SendStatus(400)
+		if user == nil {
+			return fiber.ErrBadRequest
+		}
+		return fiber.ErrInternalServerError
 	}
 
 	newAccess, _ := services.CreateAccessToken(services.TokenPayload{Id: payload.Id, IsAdmin: user.IsAdmin})
 	newRefresh, _ := services.CreateRefreshToken(services.TokenPayload{Id: payload.Id, IsAdmin: user.IsAdmin})
 	if newAccess == "" || newRefresh == "" {
-		return c.SendStatus(500)
+		return fiber.ErrInternalServerError
 	}
 
 	var ucareToken *services.UcareToken
@@ -122,7 +128,7 @@ func CheckEmail(c *fiber.Ctx) error {
 
 	u, err := services.GetUserByEmail(email)
 	if err != nil {
-		return c.SendStatus(500)
+		return fiber.ErrInternalServerError
 	}
 
 	if u == nil {
@@ -134,7 +140,7 @@ func CheckEmail(c *fiber.Ctx) error {
 		return c.SendStatus(200)
 	}
 
-	return c.SendStatus(409)
+	return fiber.ErrConflict
 }
 
 func CheckPhoneNumber(c *fiber.Ctx) error {
@@ -148,7 +154,7 @@ func CheckPhoneNumber(c *fiber.Ctx) error {
 
 	u, err := services.GetUserByPhoneNumber(phone)
 	if err != nil {
-		return c.SendStatus(500)
+		return fiber.ErrInternalServerError
 	}
 
 	if u == nil {
@@ -160,7 +166,7 @@ func CheckPhoneNumber(c *fiber.Ctx) error {
 		return c.SendStatus(200)
 	}
 
-	return c.SendStatus(409)
+	return fiber.ErrConflict
 }
 
 func Logout(c *fiber.Ctx) error {

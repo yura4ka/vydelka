@@ -29,7 +29,7 @@ import { ProductForm } from "@/features/products/components/ProductForm";
 import { useTranslation } from "react-i18next";
 import { Language } from "@/features/translations";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, createErrorToast } from "@/lib/utils";
 import { Pagination } from "@/components/Pagination";
 
 type CategoriesTableProps = {
@@ -97,7 +97,7 @@ type ProductsTableProps = {
   data: ProductsResponse | undefined;
   categoryId: string;
   filters: Filter[];
-  onError: (msg: string) => void;
+  onError: (msg?: string) => void;
 };
 
 const ProductsTable: React.FC<ProductsTableProps> = ({
@@ -221,8 +221,8 @@ export const AdminCategories = () => {
   );
 
   const { toast } = useToast();
-  const onFormError = (msg: string) => {
-    toast({ title: "Error", description: msg, variant: "destructive" });
+  const onFormError = (msg?: string) => {
+    toast(createErrorToast(undefined, msg));
   };
 
   const isSubcategoriesAllowed =

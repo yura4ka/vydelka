@@ -26,6 +26,7 @@ import {
   UploaderPreview,
 } from "@/components/FileUploader";
 import { OutputFileEntry } from "@uploadcare/blocks";
+import { isFetchQueryError } from "@/lib/utils";
 
 const initialForm = (initialData?: Product) => ({
   title: initialData?.titleTranslations ?? createTranslation(),
@@ -78,7 +79,7 @@ type Props = {
   filters: Filter[];
   isOpen: boolean;
   setOpen: (open: boolean) => void;
-  onError?: (msg: string) => void;
+  onError?: (msg?: string) => void;
 };
 
 export const ProductForm: React.FC<Props> = ({
@@ -121,15 +122,15 @@ export const ProductForm: React.FC<Props> = ({
     const request = initialData
       ? changeProduct({ ...form, filters, images, price, id: initialData.id })
       : createProduct({ ...form, filters, images, categoryId, price });
-    request
-      .unwrap()
-      .then(() => {
-        setOpen(false);
-        setForm(initialForm());
-      })
-      .catch((e) => {
-        onError?.(e.data.message);
-      });
+
+    try {
+      await request.unwrap();
+      setOpen(false);
+      setForm(initialForm());
+    } catch (e) {
+      if (isFetchQueryError(e)) onError?.(e.data.message);
+      else onError?.();
+    }
   };
 
   const isLoading = createStatus.isLoading || changeStatus.isLoading;

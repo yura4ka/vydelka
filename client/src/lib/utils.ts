@@ -63,3 +63,37 @@ export function formatStringDate(date: string, short = false) {
     minute: "2-digit",
   }).format(new Date(date));
 }
+
+export type ErrorResponse = {
+  status: number;
+  data: {
+    success: boolean;
+    message: string;
+  };
+};
+
+export function isFetchQueryError(err: unknown): err is ErrorResponse {
+  return (
+    typeof err === "object" &&
+    err !== null &&
+    "status" in err &&
+    typeof err.status === "number" &&
+    "data" in err &&
+    typeof err.data === "object" &&
+    err.data !== null &&
+    "message" in err.data &&
+    typeof err.data.message === "string"
+  );
+}
+
+export function createErrorToast(title?: string, description?: string | null) {
+  if (!title) title = i18next.t("error.something-wrong");
+  if (description === undefined)
+    description = i18next.t("error.something-wrong");
+
+  return {
+    variant: "destructive" as const,
+    title,
+    description: description ?? undefined,
+  };
+}

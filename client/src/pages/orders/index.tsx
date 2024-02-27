@@ -16,7 +16,12 @@ import {
   useCancelOrderMutation,
   useGetOrdersQuery,
 } from "@/features/orders/ordersApiSlice";
-import { cn, formatMoney, formatStringDate } from "@/lib/utils";
+import {
+  cn,
+  createErrorToast,
+  formatMoney,
+  formatStringDate,
+} from "@/lib/utils";
 import { Loader2, MoreVertical } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -24,7 +29,7 @@ import { useSearchParams } from "react-router-dom";
 
 export const OrdersPage = () => {
   const { t } = useTranslation();
-  const { isAuth, isLoading: isAuthLoading } = useAuth();
+  const { isLoading: isAuthLoading } = useAuth();
   const cart = useCart();
   const { toast } = useToast();
 
@@ -35,7 +40,7 @@ export const OrdersPage = () => {
     window.scrollTo(0, 0);
   }, [page]);
 
-  const { data, isFetching } = useGetOrdersQuery({ page }, { skip: !isAuth });
+  const { data, isFetching } = useGetOrdersQuery({ page });
 
   useEffect(() => {
     const success = searchParams.has("success");
@@ -122,17 +127,13 @@ const OrderRow = ({ order: o }: { order: Order }) => {
 
   const handleCancel = async () => {
     try {
-      await cancelOrder(o.id);
+      await cancelOrder(o.id).unwrap();
       toast({
         title: t("success"),
         description: t("order.order-canceled"),
       });
     } catch {
-      toast({
-        title: t("error.something-wrong"),
-        description: t("error.try-again"),
-        variant: "destructive",
-      });
+      toast(createErrorToast());
     }
   };
 

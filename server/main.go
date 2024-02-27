@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"log"
 	"os"
 
@@ -29,7 +30,11 @@ func init() {
 func main() {
 	app := fiber.New(fiber.Config{
 		ErrorHandler: func(c *fiber.Ctx, err error) error {
-			return c.Status(fiber.StatusBadRequest).JSON(services.GlobalErrorHandlerResp{
+			status := 500
+			if fiberErr := new(fiber.Error); errors.As(err, &fiberErr) {
+				status = fiberErr.Code
+			}
+			return c.Status(status).JSON(services.GlobalErrorHandlerResp{
 				Success: false,
 				Message: err.Error(),
 			})
