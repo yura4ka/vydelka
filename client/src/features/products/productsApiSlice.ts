@@ -52,12 +52,14 @@ export type ProductsRequest = {
   page?: number;
   filters?: string;
   ids?: string[];
+  search?: string;
 };
 
 export type ProductsResponse = {
   products: Product[];
   hasMore: boolean;
   totalPages: number;
+  total: number;
 };
 
 export type ProductsResponseNonTransformed = ProductsResponse & {
@@ -124,6 +126,7 @@ export const productApi = api.injectEndpoints({
           page: args.page,
           categoryId: args.categoryId,
           ids: args.ids?.join(","),
+          q: args.search,
         },
       }),
       transformResponse: (response: ProductsResponseNonTransformed) => {

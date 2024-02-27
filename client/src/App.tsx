@@ -4,7 +4,7 @@ import { Home } from "./pages/home";
 import { SignIn, SignUp } from "./pages/auth";
 import { AdminCategories } from "./pages/admin";
 import { CategoryPage } from "./pages/categories";
-import { ProductPage } from "./pages/products";
+import { ProductPage, SearchPage } from "./pages/products/";
 import { CheckoutPage } from "./pages/checkout";
 import { OrdersPage } from "./pages/orders";
 import { ProfilePage } from "./pages/profile";
@@ -19,6 +19,7 @@ const router = createBrowserRouter([
       { path: "/:slug", element: <CategoryPage /> },
       { path: "/p/:slug", element: <ProductPage /> },
       { path: "/checkout", element: <CheckoutPage /> },
+      { path: "/search", element: <SearchPage /> },
       {
         element: <AuthLayout />,
         children: [

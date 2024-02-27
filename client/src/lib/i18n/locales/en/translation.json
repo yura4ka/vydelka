@@ -50,6 +50,7 @@
     "recent": "Recently bought"
   },
   "product": {
+    "search-results": "Search results for",
     "filters": "Filters",
     "clear-all": "Clear All",
     "not-found": "No products found...",

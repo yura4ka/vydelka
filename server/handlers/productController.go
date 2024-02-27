@@ -29,6 +29,7 @@ func GetProducts(c *fiber.Ctx) error {
 		Filters:          filters,
 		OrderBy:          c.Query("orderBy", "new"),
 		Ids:              ids,
+		Search:           c.Query("q"),
 	}
 
 	products, err := services.GetProducts(request)
@@ -36,15 +37,16 @@ func GetProducts(c *fiber.Ctx) error {
 		return fiber.ErrInternalServerError
 	}
 
-	hasMore, total, err := services.HasMoreProducts(request)
+	total, err := services.GetTotalProducts(request)
 	if err != nil {
 		return fiber.ErrInternalServerError
 	}
 
 	return c.JSON(fiber.Map{
 		"products":   products,
-		"hasMore":    hasMore,
-		"totalPages": total,
+		"hasMore":    total.HasMore,
+		"totalPages": total.TotalPages,
+		"total":      total.Total,
 	})
 }
 

@@ -144,6 +144,7 @@ type ProductsRequest struct {
 	OrderBy          string
 	Ids              []string
 	Cnt              int
+	Search           string
 }
 
 func createFiltersQuery(filters map[string][]string) (string, []any) {
@@ -226,6 +227,10 @@ func GetProducts(request *ProductsRequest) ([]Product, error) {
 			AND p.id = ANY(${{$arg_counter}}::uuid[])
 			{{$arg_counter = inc $arg_counter}}
 		{{end}}
+		{{if .Search}}
+			AND plainto_tsquery(${{.Cnt}}::TEXT::REGCONFIG, ${{$arg_counter}}) @@ pt.search
+			{{$arg_counter = inc $arg_counter}}
+		{{end}}
 		GROUP BY p.id, r.rating, r.cnt
 		{{if .Filters}}
 			, p.slug, p.price
@@ -261,6 +266,9 @@ func GetProducts(request *ProductsRequest) ([]Product, error) {
 	}
 	if len(request.Ids) > 0 {
 		args = append(args, request.Ids)
+	}
+	if request.Search != "" {
+		args = append(args, request.Search)
 	}
 
 	offset := 0
@@ -298,17 +306,37 @@ func GetProducts(request *ProductsRequest) ([]Product, error) {
 	return result, err
 }
 
-func HasMoreProducts(request *ProductsRequest) (bool, int, error) {
-	tmpl := template.Must(template.New("productsTotalQuery").Parse(`
+type ProductsTotal struct {
+	HasMore    bool
+	Total      uint64
+	TotalPages uint64
+}
+
+func GetTotalProducts(request *ProductsRequest) (*ProductsTotal, error) {
+	tmpl := template.Must(template.New("productsTotalQuery").Funcs(template.FuncMap{
+		"inc": func(n int) int {
+			return n + 1
+		},
+	}).Parse(`
+		{{$arg_counter:=.Cnt}}
 		SELECT COUNT(*) 
 		{{if .Filters}}
 			FROM filtered_products AS p
 		{{else}}
 			FROM products AS p
 		{{end}}
+		{{if .Search}}
+			LEFT JOIN product_translations AS pt ON p.id = pt.product_id AND lang = ${{$arg_counter}}
+			{{$arg_counter = inc $arg_counter}}
+		{{end}}
 		WHERE TRUE
+			{{if .Search}}
+				AND plainto_tsquery(${{.Cnt}}::TEXT::REGCONFIG, ${{$arg_counter}}) @@ pt.search
+				{{$arg_counter = inc $arg_counter}}
+			{{end}}
 			{{if .CategoryId}}
-				AND p.category_id = ${{.Cnt}}
+				AND p.category_id = ${{$arg_counter}}
+				{{$arg_counter = inc $arg_counter}}
 			{{end}}
 		;
 	`))
@@ -320,21 +348,24 @@ func HasMoreProducts(request *ProductsRequest) (bool, int, error) {
 	}
 
 	request.Cnt = len(args) + 1
+	if request.Search != "" {
+		args = append(args, request.Lang, request.Search)
+	}
 	if request.CategoryId != "" {
 		args = append(args, request.CategoryId)
 	}
 	query := filtersQuery + ExecuteTemplate(tmpl, request)
 
-	var total int
+	var total uint64
 	err := pgxscan.Get(db.Ctx, db.Client, &total, query, args...)
 	if err != nil {
-		return false, 0, err
+		return nil, err
 	}
 
-	hasMore := total > request.Page*PRODUCTS_PER_PAGE
+	hasMore := total > uint64(request.Page)*uint64(PRODUCTS_PER_PAGE)
 	totalPages := (total + PRODUCTS_PER_PAGE - 1) / PRODUCTS_PER_PAGE
 
-	return hasMore, totalPages, nil
+	return &ProductsTotal{HasMore: hasMore, Total: total, TotalPages: totalPages}, nil
 }
 
 type TChangeProduct struct {

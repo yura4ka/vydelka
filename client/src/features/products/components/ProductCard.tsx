@@ -21,12 +21,13 @@ export const ProductCard: React.FC<Props> = ({
 }) => {
   const cart = useCart();
   const isInCart = !!useAppSelector(() => cart.getItem(product.id));
+  const hasFilters = filters && product.filters.size !== 0;
 
   return (
     <div
       className={cn(
         "group/product relative z-[2] space-y-2 hover:z-[3]",
-        product.filters.size !== 0 &&
+        hasFilters &&
           "before:absolute before:-left-2 before:-right-2 before:-top-2 before:bottom-0 before:z-[-1] before:hidden before:bg-background before:shadow-[0_0_4px_4px] before:shadow-border sm:hover:before:block",
         className,
       )}
@@ -55,7 +56,7 @@ export const ProductCard: React.FC<Props> = ({
         to={`/p/${product.slug}`}
         className={cn(
           "line-clamp-2 min-w-0 text-sm leading-tight transition-colors",
-          !product.filters.size && "hover:text-primary peer-hover:text-primary",
+          !hasFilters && "hover:text-primary peer-hover:text-primary",
         )}
       >
         {product.title}
@@ -86,7 +87,7 @@ export const ProductCard: React.FC<Props> = ({
           </span>
         </Button>
       </div>
-      {product.filters.size !== 0 && (
+      {hasFilters && (
         <dl className="absolute left-0 hidden w-full bg-background text-xs after:absolute after:-bottom-2 after:-left-2 after:-right-2 after:top-0 after:-z-[1] after:block after:bg-background after:shadow-[0_4px_4px_0,4px_4px_4px_0,-4px_4px_4px_0] after:shadow-border sm:group-hover/product:block">
           {filters?.map((f) => (
             <div key={f.id} className="line-clamp-1">

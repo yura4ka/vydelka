@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/features/auth/useAuth";
 import { useLogoutMutation } from "@/features/auth/authApiSlice";
 import {
@@ -431,8 +431,36 @@ const UserButton = () => {
   );
 };
 
-export const Navbar = () => {
+export const Search = () => {
   const { t } = useTranslation();
+  const [searchParams] = useSearchParams();
+  const search = searchParams.get("q") || "";
+  const navigate = useNavigate();
+  const ref = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (ref.current) ref.current.value = search;
+  }, [search]);
+
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const q = ref.current?.value.trim();
+    if (q) navigate(`/search?q=${q}`);
+    ref.current?.blur();
+  };
+
+  return (
+    <form onSubmit={onSubmit} className="grow">
+      <Input
+        ref={ref}
+        placeholder={t("navigation.search-placeholder")}
+        name="search"
+      />
+    </form>
+  );
+};
+
+export const Navbar = () => {
   const cart = useCart();
   const cartItemsSize = useAppSelector(() => cart.getIds()).length;
 
@@ -450,12 +478,7 @@ export const Navbar = () => {
           <Categories />
         </div>
         <div className="flex grow items-center gap-2 sm:gap-4 md:grow-0">
-          <form className="grow">
-            <Input
-              placeholder={t("navigation.search-placeholder")}
-              name="search"
-            />
-          </form>
+          <Search />
           <div className="flex items-center">
             <Button
               onClick={() => cart.setOpen(true)}

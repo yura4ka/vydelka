@@ -38,7 +38,7 @@ export function formatMoney(kop: number) {
   }).format(uah);
 }
 
-export const RESTRICTED_FILTERS = ["orderBy", "page", "ids"];
+export const RESTRICTED_FILTERS = ["orderBy", "page", "ids", "q"];
 
 export const PRODUCTS_ORDER_BY = [
   "new",
