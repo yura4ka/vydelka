@@ -29,7 +29,12 @@ import { ProductForm } from "@/features/products/components/ProductForm";
 import { useTranslation } from "react-i18next";
 import { Language } from "@/features/translations";
 import { Button } from "@/components/ui/button";
-import { cn, createErrorToast } from "@/lib/utils";
+import {
+  cn,
+  createErrorToast,
+  formatMoney,
+  formatStringDate,
+} from "@/lib/utils";
 import { Pagination } from "@/components/Pagination";
 
 type CategoriesTableProps = {
@@ -58,7 +63,7 @@ const CategoriesTable: React.FC<CategoriesTableProps> = ({
             <TableHead>Title</TableHead>
             <TableHead>Slug</TableHead>
             <TableHead>Created At</TableHead>
-            <TableHead>Image</TableHead>
+            <TableHead className="hidden md:table-cell">Image</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -73,8 +78,8 @@ const CategoriesTable: React.FC<CategoriesTableProps> = ({
                 </Link>
               </TableCell>
               <TableCell>{c.slug}</TableCell>
-              <TableCell>{new Date(c.createdAt).toLocaleString()}</TableCell>
-              <TableCell>
+              <TableCell>{formatStringDate(c.createdAt, true)}</TableCell>
+              <TableCell className="hidden md:table-cell">
                 {c.imageUrl && (
                   <img
                     src={`${c.imageUrl}-/scale_crop/50x50/center/-/progressive/yes/`}
@@ -134,9 +139,9 @@ const ProductsTable: React.FC<ProductsTableProps> = ({
         <TableHeader>
           <TableRow>
             <TableHead>Title</TableHead>
-            <TableHead>Price</TableHead>
+            <TableHead className="hidden md:table-cell">Price</TableHead>
             <TableHead>Description</TableHead>
-            <TableHead>Image</TableHead>
+            <TableHead className="hidden md:table-cell">Image</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -155,13 +160,15 @@ const ProductsTable: React.FC<ProductsTableProps> = ({
           {data?.products.map((p) => (
             <TableRow key={p.id}>
               <TableCell>{p.titleTranslations[lang]}</TableCell>
-              <TableCell>{p.price / 100}</TableCell>
+              <TableCell className="hidden md:table-cell">
+                {formatMoney(p.price)}
+              </TableCell>
               <TableCell className="max-w-24">
                 <p className="line-clamp-1">
                   {p.descriptionTranslations[lang]}
                 </p>
               </TableCell>
-              <TableCell>
+              <TableCell className="hidden md:table-cell">
                 <img
                   src={`${p.images[0].imageUrl}-/scale_crop/50x50/center/-/progressive/yes/`}
                   alt="cover"
@@ -190,6 +197,7 @@ const ProductsTable: React.FC<ProductsTableProps> = ({
       </Table>
       <Pagination page={page} totalPages={data?.totalPages ?? 1} />
       <ProductForm
+        key={productModal.product?.id ?? ""}
         isOpen={productModal.isOpen}
         setOpen={(open) => setProductModal({ isOpen: open })}
         filters={filters}
@@ -232,10 +240,11 @@ export const AdminCategories = () => {
   const isFinalCategory = !categories || categories.length === 0;
 
   return (
-    <main className="container space-y-10 py-8">
+    <main className="container space-y-10 pt-8">
       <div className="flex flex-wrap items-start justify-between gap-8">
         {id && (
           <CategoryForm
+            key={categoryInfo?.id ?? ""}
             className="w-full md:w-auto md:max-w-[600px] md:grow"
             initialData={categoryInfo}
             onSuccess={() =>

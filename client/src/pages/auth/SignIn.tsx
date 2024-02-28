@@ -14,7 +14,7 @@ export const SignIn = () => {
     <main className="flex justify-center py-4 xs:items-center">
       <LoginForm
         onSuccess={() => navigate("/")}
-        className="max-w-screen-xs border-0 xs:border"
+        className="max-w-screen-xs border-0 shadow-none xs:border xs:shadow"
       />
     </main>
   );

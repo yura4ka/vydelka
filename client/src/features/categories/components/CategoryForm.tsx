@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { OutputFileEntry } from "@uploadcare/blocks";
 import { createTranslation } from "@/features/translations";
 import {
@@ -41,13 +41,6 @@ export const CategoryForm: React.FC<Props> = ({
     () => initialData?.title ?? createTranslation(),
   );
   const [form, setForm] = useState(() => initialForm(initialData));
-
-  useEffect(() => {
-    if (initialData) {
-      setForm(initialForm(initialData));
-      setTranslations(initialData.title);
-    }
-  }, [initialData]);
 
   const [createCategory, createStatus] = useCreateCategoryMutation();
   const [changeCategory, changeStatus] = useChangeCategoryMutation();

@@ -93,7 +93,6 @@ func GetUserByPhoneNumber(phone string) (*User, error) {
 type TChangeUserInfo struct {
 	FirstName   *string `json:"firstName" validate:"required_without_all=LastName Email PhoneNumber,omitempty" mod:"trim"`
 	LastName    *string `json:"lastName" validate:"required_without_all=FirstName Email PhoneNumber,omitempty" mod:"trim"`
-	Email       *string `json:"email" validate:"required_without_all=FirstName LastName PhoneNumber,omitempty,email" mod:"trim"`
 	PhoneNumber *string `json:"phoneNumber" validate:"required_without_all=FirstName LastName Email,omitempty,e164" mod:"trim"`
 }
 
@@ -119,8 +118,6 @@ func ChangeUser(userId string, request *TChangeUser) error {
 		first_name = 
 		{{if and .User .User.FirstName}} ${{$arg_counter}}{{$arg_counter = inc $arg_counter}} {{else}} first_name {{end}},
 		last_name = 
-		{{if and .User .User.LastName}} ${{$arg_counter}}{{$arg_counter = inc $arg_counter}} {{else}} last_name {{end}},
-		email = 
 		{{if and .User .User.Email}} ${{$arg_counter}}{{$arg_counter = inc $arg_counter}} {{else}} email {{end}},
 		phone = 
 		{{if and .User .User.PhoneNumber}} ${{$arg_counter}}{{$arg_counter = inc $arg_counter}} {{else}} phone {{end}},
@@ -132,7 +129,7 @@ func ChangeUser(userId string, request *TChangeUser) error {
 	args := make([]any, 0)
 	if request.User != nil {
 		args = AppendIfNotNil(args,
-			request.User.FirstName, request.User.LastName, request.User.Email, request.User.PhoneNumber)
+			request.User.FirstName, request.User.LastName, request.User.PhoneNumber)
 	}
 	if request.Password != nil {
 		user, err := GetUserById(userId)

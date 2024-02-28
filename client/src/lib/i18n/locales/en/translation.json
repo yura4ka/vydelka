@@ -2,6 +2,11 @@
   "success": "Success!",
   "cancel": "Cancel",
   "ok": "Ok",
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
   "navigation": {
     "categories": "Categories",
     "search-placeholder": "Search...",

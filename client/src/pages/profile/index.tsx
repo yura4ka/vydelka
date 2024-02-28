@@ -5,7 +5,6 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { useToast } from "@/components/ui/use-toast";
 import {
   useChangeUserMutation,
-  useLazyCheckEmailQuery,
   useLazyCheckPhoneNumberQuery,
 } from "@/features/auth/authApiSlice";
 import { User } from "@/features/auth/authSlice";
@@ -13,7 +12,6 @@ import { useAuth } from "@/features/auth/useAuth";
 import { useDebounce } from "@/hooks";
 import {
   createErrorToast,
-  emailRegex,
   isFetchQueryError,
   passwordRegex,
   phoneRegex,
@@ -24,14 +22,12 @@ import { useTranslation } from "react-i18next";
 const initialForm = (user: User) => ({
   firstName: user.firstName,
   lastName: user.lastName,
-  email: user.email,
   phoneNumber: user.phoneNumber,
 });
 
 const initialFormErrors = () => ({
   firstName: false,
   lastName: false,
-  email: false,
   phoneNumber: false,
 });
 
@@ -40,7 +36,6 @@ const UserForm = ({ user }: { user: User }) => {
   const { toast } = useToast();
 
   const [changeUser, changeStatus] = useChangeUserMutation();
-  const [checkEmail, checkEmailStatus] = useLazyCheckEmailQuery();
   const [checkPhone, checkPhoneStatus] = useLazyCheckPhoneNumberQuery();
 
   const [form, setForm] = useState(() => initialForm(user));
@@ -52,12 +47,6 @@ const UserForm = ({ user }: { user: User }) => {
   const changeFormErrors = (patch: Partial<typeof formErrors>) => {
     setFormErrors((prev) => ({ ...prev, ...patch }));
   };
-
-  const debouncedEmail = useDebounce(form.email);
-  useEffect(() => {
-    const trimmed = debouncedEmail.trim();
-    if (!formErrors.email && trimmed.length > 0) checkEmail(trimmed);
-  }, [checkEmail, debouncedEmail, formErrors.email]);
 
   const debouncedPhone = useDebounce(form.phoneNumber);
   useEffect(() => {
@@ -102,20 +91,10 @@ const UserForm = ({ user }: { user: User }) => {
       />
       <CustomInput
         type="email"
-        value={form.email}
-        onChange={(e) => changeForm({ email: e.target.value })}
-        validate={(value) => emailRegex.test(value.trim())}
-        onValidate={(success) => changeFormErrors({ email: !success })}
-        isError={formErrors.email || checkEmailStatus.isError}
-        isLoading={checkEmailStatus.isFetching}
+        defaultValue={user.email}
         label={t("auth.email.label")}
-        errorMessage={
-          formErrors.email
-            ? t("auth.email.wrong-format")
-            : t("auth.email.already-taken")
-        }
-        placeholder="taylor_js@gmail.com"
-        autoComplete="email"
+        readOnly={true}
+        disabled={true}
       />
       <CustomInput
         type="tel"
@@ -137,7 +116,6 @@ const UserForm = ({ user }: { user: User }) => {
       <SubmitButton
         isLoading={changeStatus.isLoading}
         disabled={
-          checkEmailStatus.isFetching ||
           checkPhoneStatus.isFetching ||
           Object.values(formErrors).some((e) => e === true)
         }

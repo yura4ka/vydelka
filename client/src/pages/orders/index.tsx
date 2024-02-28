@@ -78,7 +78,7 @@ export const OrdersPage = () => {
   }, [cart, data, searchParams, setSearchParams, t, toast]);
 
   return (
-    <main className="container max-w-screen-2xl space-y-8 px-2 py-8 xs:px-4">
+    <main className="container max-w-screen-2xl space-y-8 px-2 pt-8 xs:px-4">
       <h1 className="text-4xl font-extrabold tracking-tight">
         {t("navigation.orders")}
       </h1>

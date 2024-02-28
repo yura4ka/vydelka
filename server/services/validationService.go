@@ -80,7 +80,7 @@ func ValidateJSON(c *fiber.Ctx, input interface{}) *fiber.Error {
 }
 
 func ValidateVar(field interface{}, tags ...string) error {
-	if len(tags) < 2 {
+	if len(tags) < 1 {
 		return nil
 	}
 

@@ -2,6 +2,11 @@
   "success": "Успіх!",
   "cancel": "Скасувати",
   "ok": "Ок",
+  "theme": {
+    "light": "Світла",
+    "dark": "Темна",
+    "system": "Системна"
+  },
   "navigation": {
     "categories": "Каталог",
     "search-placeholder": "Пошук...",

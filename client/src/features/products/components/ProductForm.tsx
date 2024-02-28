@@ -16,7 +16,7 @@ import {
 import { CustomInput } from "@/components/CustomInput";
 import { SubmitButton } from "@/components/SubmitButton";
 import { Language, createTranslation } from "@/features/translations";
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useState } from "react";
 import { CustomTextArea } from "@/components/CustomTextArea";
 import { Filter } from "@/features/categories/categoriesApiSlice";
 import { useTranslation } from "react-i18next";
@@ -94,9 +94,6 @@ export const ProductForm: React.FC<Props> = ({
   const lang = (i18n.resolvedLanguage ?? "en") as Language;
 
   const [form, setForm] = useState(() => initialForm(initialData));
-  useEffect(() => {
-    setForm(initialForm(initialData));
-  }, [initialData]);
 
   const [createProduct, createStatus] = useCreateProductMutation();
   const [changeProduct, changeStatus] = useChangeProductMutation();

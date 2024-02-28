@@ -15,7 +15,7 @@ export type LoginRequest = {
 };
 
 export type ChangeUser = {
-  user?: Omit<Partial<RegisterRequest>, "password">;
+  user?: Omit<Partial<RegisterRequest>, "password" | "email">;
   password?: {
     oldPassword: string;
     newPassword: string;
