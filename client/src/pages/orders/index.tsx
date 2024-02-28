@@ -113,6 +113,11 @@ export const OrdersPage = () => {
           )}
         </tbody>
       </table>
+      {data?.orders.length === 0 && (
+        <p className="text-center text-sm text-muted-foreground">
+          {t("order.nothing")}
+        </p>
+      )}
       <Pagination page={page} totalPages={data?.totalPages ?? 1} />
     </main>
   );

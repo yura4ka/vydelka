@@ -103,7 +103,12 @@ CREATE TABLE users (
   last_name VARCHAR(128) NOT NULL,
   email VARCHAR(128) UNIQUE NOT NULL,
   phone VARCHAR(16) UNIQUE NOT NULL,
-  password TEXT NOT NULL
+  password TEXT NOT NULL,
+  restoration_code VARCHAR(6),
+  restoration_expires_at TIMESTAMPTZ,
+  last_restoration_at TIMESTAMPTZ,
+  last_restoration_attempt_at TIMESTAMPTZ,
+  restoration_attempts SMALLINT DEFAULT 0,
 );
 
 CREATE TABLE orders (

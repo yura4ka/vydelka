@@ -3,18 +3,17 @@ import { Input } from "./ui/input";
 import { useRef } from "react";
 
 type Props = Omit<React.HTMLAttributes<HTMLDivElement>, "onChange"> & {
-  count: number;
   value: string[];
   onChange: (value: string[]) => void;
 };
 
 export const OTP: React.FC<Props> = ({
-  count,
   value,
   onChange,
   className,
   ...rest
 }) => {
+  const count = value.length;
   const refs = useRef<HTMLInputElement[]>([]);
 
   const setFocus = (index: number) => {
@@ -28,7 +27,7 @@ export const OTP: React.FC<Props> = ({
     }
     if (!notEmpty) setFocus(0);
 
-    const empty = value.findIndex((v) => !v);
+    const empty = value.findIndex((v, i) => !v && i !== index);
     if (empty !== -1) setFocus(empty);
     else refs.current[index].blur();
   };
@@ -48,8 +47,11 @@ export const OTP: React.FC<Props> = ({
     return newValue;
   };
 
-  const handleChange = (val: string, index: number) => {
-    const newValue = changeValue(val, index);
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    index: number,
+  ) => {
+    const newValue = changeValue(e.target.value, index);
     if (newValue[index] !== "") setNextFocus(index, true);
   };
 
@@ -114,14 +116,15 @@ export const OTP: React.FC<Props> = ({
             if (node) refs.current[i] = node;
           }}
           value={v}
-          onChange={(e) => handleChange(e.target.value, i)}
+          onChange={(e) => handleChange(e, i)}
           onFocus={handleFocus}
           onKeyDown={(e) => handleKeyDown(e, i)}
           onPaste={(e) => handlePaste(e, i)}
+          autoFocus={i === 0}
           name={"otp" + i}
           type="number"
           autoComplete="one-time-code"
-          className="no-arrows h-20 w-full px-0 text-center text-xl xs:h-12 xs:w-12 xs:text-lg"
+          className="no-arrows h-20 w-full px-0 text-center text-2xl font-bold xs:w-12"
         />
       ))}
     </div>

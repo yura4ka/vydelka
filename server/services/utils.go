@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"errors"
 	"log"
+	"math/rand"
 	"text/template"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/jackc/pgerrcode"
@@ -76,4 +78,15 @@ func AppendIfNotNil(arr []any, values ...*string) []any {
 		}
 	}
 	return arr
+}
+
+func GenerateRandomCode() string {
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+
+	digits := make([]byte, 6)
+	for i := range digits {
+		digits[i] = byte(r.Intn(10)) + '0'
+	}
+
+	return string(digits)
 }

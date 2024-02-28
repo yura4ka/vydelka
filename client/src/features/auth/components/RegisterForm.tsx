@@ -108,7 +108,10 @@ export const RegisterForm = ({
         <CardTitle>{t("auth.sign-up")}</CardTitle>
         <CardDescription>
           <span>{t("auth.have-account")} </span>
-          <Link to="/auth/sign-in" className="link">
+          <Link
+            to="/auth/sign-in"
+            className="font-semibold text-primary transition-colors hover:text-primary/80 hover:underline"
+          >
             {t("auth.sign-in").toLowerCase()}
           </Link>
         </CardDescription>

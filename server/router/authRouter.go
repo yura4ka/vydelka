@@ -16,4 +16,7 @@ func addAuthRouter(app *fiber.App) {
 	auth.Post("/logout", handlers.Logout)
 	auth.Get("/availability/email/:email", middleware.ParseAuth, handlers.CheckEmail)
 	auth.Get("/availability/phone/:phone", middleware.ParseAuth, handlers.CheckPhoneNumber)
+	auth.Post("/passwordRestoration", handlers.GenerateRestoreCode)
+	auth.Post("/passwordRestoration/check", handlers.CheckRestorationCode)
+	auth.Patch("/passwordRestoration/password", handlers.ResetPassword)
 }

@@ -193,3 +193,74 @@ func PatchUser(c *fiber.Ctx) error {
 		"message": "Ok",
 	})
 }
+
+func GenerateRestoreCode(c *fiber.Ctx) error {
+	type Input struct {
+		Email string `json:"email" validate:"email" mod:"trim"`
+	}
+	input := new(Input)
+	if err := services.ValidateJSON(c, input); err != nil {
+		return err
+	}
+
+	lang := c.Locals("lang").(services.Language)
+	result, err := services.GenerateRestoreCode(input.Email, lang)
+	if err != nil {
+		if errors.Is(err, services.ErrTooManyAttempts) {
+			return fiber.ErrTooManyRequests
+		}
+		return fiber.ErrInternalServerError
+	}
+	if result == nil {
+		return fiber.ErrNotFound
+	}
+
+	return c.JSON(result)
+}
+
+func CheckRestorationCode(c *fiber.Ctx) error {
+	input := new(services.CheckCodeRequest)
+	if err := services.ValidateJSON(c, input); err != nil {
+		return err
+	}
+
+	ok, err := services.CheckResetCode(input)
+	if err != nil {
+		if errors.Is(err, services.ErrTooManyAttempts) {
+			return fiber.ErrTooManyRequests
+		}
+		if errors.Is(err, services.ErrCodeExpired) {
+			return fiber.ErrForbidden
+		}
+		return fiber.ErrInternalServerError
+	}
+
+	return c.JSON(fiber.Map{
+		"ok": ok,
+	})
+}
+
+func ResetPassword(c *fiber.Ctx) error {
+	input := new(services.ResetPasswordRequest)
+	if err := services.ValidateJSON(c, input); err != nil {
+		return err
+	}
+
+	err := services.ResetPassword(input)
+	if err != nil {
+		if errors.Is(err, services.ErrTooManyAttempts) {
+			return fiber.ErrTooManyRequests
+		}
+		if errors.Is(err, services.ErrWrongCode) {
+			return fiber.ErrBadRequest
+		}
+		if errors.Is(err, services.ErrCodeExpired) {
+			return fiber.ErrForbidden
+		}
+		return fiber.ErrInternalServerError
+	}
+
+	return c.JSON(fiber.Map{
+		"message": "Ok",
+	})
+}

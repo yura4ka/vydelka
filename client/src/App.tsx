@@ -1,7 +1,7 @@
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import { Layout, AuthLayout } from "./components/layout";
 import { Home } from "./pages/home";
-import { SignIn, SignUp } from "./pages/auth";
+import { RestorePassword, SignIn, SignUp } from "./pages/auth";
 import { AdminCategories } from "./pages/admin";
 import { CategoryPage } from "./pages/categories";
 import { ProductPage, SearchPage } from "./pages/products/";
@@ -32,6 +32,7 @@ const router = createBrowserRouter([
         children: [
           { path: "sign-in", element: <SignIn /> },
           { path: "sign-up", element: <SignUp /> },
+          { path: "restore-password", element: <RestorePassword /> },
         ],
       },
       {

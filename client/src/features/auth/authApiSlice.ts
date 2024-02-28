@@ -22,6 +22,20 @@ export type ChangeUser = {
   };
 };
 
+export type RestorationCodeResponse = {
+  attempts: number;
+  maxAttempts: number;
+};
+
+export type CheckCodeRequest = {
+  email: string;
+  code: string;
+};
+
+export type RestorePasswordRequest = CheckCodeRequest & {
+  newPassword: string;
+};
+
 export const authApi = api.injectEndpoints({
   endpoints: (builder) => ({
     register: builder.mutation<{ id: string }, RegisterRequest>({
@@ -75,6 +89,30 @@ export const authApi = api.injectEndpoints({
         if (body.user) dispatch(changeUser(body.user));
       },
     }),
+
+    requestCode: builder.mutation<RestorationCodeResponse, string>({
+      query: (email) => ({
+        url: `/auth/passwordRestoration`,
+        method: "POST",
+        body: { email },
+      }),
+    }),
+
+    checkCode: builder.mutation<{ ok: boolean }, CheckCodeRequest>({
+      query: (body) => ({
+        url: `/auth/passwordRestoration/check`,
+        method: "POST",
+        body,
+      }),
+    }),
+
+    resetPassword: builder.mutation<undefined, RestorePasswordRequest>({
+      query: (body) => ({
+        url: `/auth/passwordRestoration/password`,
+        method: "PATCH",
+        body,
+      }),
+    }),
   }),
 });
 
@@ -86,4 +124,7 @@ export const {
   useLazyCheckPhoneNumberQuery,
   useLogoutMutation,
   useChangeUserMutation,
+  useRequestCodeMutation,
+  useCheckCodeMutation,
+  useResetPasswordMutation,
 } = authApi;

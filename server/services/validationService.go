@@ -79,9 +79,18 @@ func ValidateJSON(c *fiber.Ctx, input interface{}) *fiber.Error {
 	return nil
 }
 
-func ValidateVar(field interface{}, tag string) error {
-	conform.Field(context.Background(), field, tag)
-	return validate.Var(field, tag)
+func ValidateVar(field interface{}, tags ...string) error {
+	if len(tags) < 2 {
+		return nil
+	}
+
+	validateTag := tags[0]
+	modTag := ""
+	if len(tags) > 1 {
+		modTag = tags[1]
+	}
+	conform.Field(context.Background(), field, modTag)
+	return validate.Var(field, validateTag)
 }
 
 func SetupValidator() {

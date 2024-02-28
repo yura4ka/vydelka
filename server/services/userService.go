@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
+	"path/filepath"
 	"text/template"
 	"time"
 
@@ -13,6 +15,14 @@ import (
 )
 
 var ErrWrongPassword = errors.New("wrong password")
+var ErrTooManyAttempts = errors.New("too many attempts")
+var ErrWrongCode = errors.New("wrong code")
+var ErrCodeExpired = errors.New("code expired")
+
+const (
+	RESTORATION_TIMEOUT      = time.Hour * 6
+	MAX_RESTORATION_ATTEMPTS = 5
+)
 
 type NewUser struct {
 	FirstName   string `json:"firstName" validate:"required" mod:"trim"`
@@ -42,14 +52,19 @@ func CompareHashAndPassword(hash string, password string) error {
 }
 
 type User struct {
-	Id        string
-	CreatedAt time.Time
-	IsAdmin   bool
-	FirstName string
-	LastName  string
-	Email     string
-	Phone     string
-	Password  string
+	Id                       string
+	CreatedAt                time.Time
+	IsAdmin                  bool
+	FirstName                string
+	LastName                 string
+	Email                    string
+	Phone                    string
+	Password                 string
+	RestorationCode          *string
+	RestorationExpiresAt     *time.Time
+	LastRestorationAt        *time.Time
+	LastRestorationAttemptAt *time.Time
+	RestorationAttempts      int
 }
 
 func getUserBy(field, value string) (*User, error) {
@@ -143,5 +158,131 @@ func ChangeUser(userId string, request *TChangeUser) error {
 	log.Println(query)
 	log.Println(args)
 	_, err := db.Client.Exec(db.Ctx, query, args...)
+	return err
+}
+
+type RestorationCodeResponse struct {
+	Attempts    int `json:"attempts"`
+	MaxAttempts int `json:"maxAttempts"`
+}
+
+func GenerateRestoreCode(email string, lang Language) (*RestorationCodeResponse, error) {
+	user, err := GetUserByEmail(email)
+	if err != nil || user == nil {
+		return nil, err
+	}
+
+	if user.LastRestorationAt != nil &&
+		user.LastRestorationAt.Add(RESTORATION_TIMEOUT).Compare(time.Now()) > 0 {
+		return nil, ErrTooManyAttempts
+	}
+
+	if user.RestorationAttempts == MAX_RESTORATION_ATTEMPTS &&
+		user.LastRestorationAttemptAt.Add(RESTORATION_TIMEOUT).Compare(time.Now()) > 0 {
+		return nil, ErrTooManyAttempts
+	}
+
+	path, err := filepath.Abs(fmt.Sprintf("./templates/RestorePassword_%s.html", lang[:2]))
+	if err != nil {
+		return nil, err
+	}
+	subject := "Password Restoration"
+	if lang == Languages.Ua {
+		subject = "Відновлення паролю"
+	}
+
+	code := GenerateRandomCode()
+
+	data := struct{ Link, Code string }{os.Getenv("CLIENT_ADDR"), code}
+	err = SendEmail(email, subject, path, data)
+	if err != nil {
+		return nil, err
+	}
+
+	attempts := 0
+	if user.LastRestorationAttemptAt != nil &&
+		user.LastRestorationAttemptAt.Add(RESTORATION_TIMEOUT).Compare(time.Now()) > 0 {
+		attempts = user.RestorationAttempts
+	}
+
+	_, err = db.Client.Exec(db.Ctx, `
+		UPDATE users
+		SET restoration_code = $1, restoration_expires_at = $2, restoration_attempts = $3
+		WHERE email = $4;
+	`, code, time.Now().Add(time.Hour*24), attempts, email)
+
+	return &RestorationCodeResponse{
+		Attempts:    attempts,
+		MaxAttempts: MAX_RESTORATION_ATTEMPTS,
+	}, err
+}
+
+type CheckCodeRequest struct {
+	Email string `json:"email" validate:"email" mod:"trim"`
+	Code  string `json:"code" validate:"required" mod:"trim"`
+}
+
+func CheckResetCode(request *CheckCodeRequest) (bool, error) {
+	user, err := GetUserByEmail(request.Email)
+	if err != nil || user == nil {
+		return false, err
+	}
+
+	if user.LastRestorationAt != nil &&
+		user.LastRestorationAt.Add(RESTORATION_TIMEOUT).Compare(time.Now()) > 0 {
+		return false, ErrTooManyAttempts
+	}
+
+	if user.RestorationAttempts == MAX_RESTORATION_ATTEMPTS &&
+		user.LastRestorationAttemptAt.Add(RESTORATION_TIMEOUT).Compare(time.Now()) > 0 {
+		return false, ErrTooManyAttempts
+	}
+
+	if user.RestorationExpiresAt != nil &&
+		user.RestorationExpiresAt.Compare(time.Now()) <= 0 {
+		return false, ErrCodeExpired
+	}
+
+	isEqual := *user.RestorationCode == request.Code
+	attempts := user.RestorationAttempts
+	if !isEqual {
+		attempts++
+	}
+
+	_, err = db.Client.Exec(db.Ctx, `
+		UPDATE users SET
+		last_restoration_attempt_at = $1, restoration_attempts = $2
+		WHERE email = $3
+	`, time.Now(), attempts, request.Email)
+
+	return isEqual, err
+}
+
+type ResetPasswordRequest struct {
+	CheckCodeRequest
+	NewPassword string
+}
+
+func ResetPassword(request *ResetPasswordRequest) error {
+	isEqual, err := CheckResetCode(&request.CheckCodeRequest)
+	if err != nil {
+		return err
+	}
+	if !isEqual {
+		return ErrWrongCode
+	}
+
+	hashed, err := bcrypt.GenerateFromPassword([]byte(request.NewPassword), 10)
+	if err != nil {
+		return err
+	}
+
+	_, err = db.Client.Exec(db.Ctx, `
+		UPDATE users
+		SET restoration_attempts = 0, restoration_code = NULL,
+			last_restoration_at = $1, restoration_expires_at = $1, password = $2
+		WHERE email = $3
+	`, time.Now(), hashed, request.Email)
+
 	return err
 }

@@ -1,6 +1,7 @@
 {
   "success": "Success!",
   "cancel": "Cancel",
+  "ok": "Ok",
   "navigation": {
     "categories": "Categories",
     "search-placeholder": "Search...",
@@ -43,7 +44,21 @@
     },
     "email-or-phone": "Email or Phone Number",
     "wrong-all": "Wrong email, phone or password",
-    "wrong-password": "Wrong password"
+    "wrong-password": "Wrong password",
+    "forgot-password": "Forgot password?",
+    "password-restoration": "Restore your password",
+    "enter-email": "Enter your account email address, and we send you a code",
+    "send": "Send",
+    "enter-code": "Enter the code we have sent you on",
+    "wrong-email": "Wrong email address?",
+    "enter-new": "Enter a new password",
+    "error": {
+      "attempts": "Too many attempts!",
+      "attempts-description": "There was too many attempts. Please try again later",
+      "expired": "Expired!",
+      "expired-description": "This code has already expired. Please request a new one if needed",
+      "wrong-code": "Wrong code! Please make sure you enter the correct one"
+    }
   },
   "home": {
     "popular": "Popular products",
@@ -140,7 +155,8 @@
     "actions": "Actions",
     "pay": "Pay",
     "cancel": "Cancel",
-    "more": "More"
+    "more": "More",
+    "nothing": "Nothing here..."
   },
   "account": {
     "change": "Change",

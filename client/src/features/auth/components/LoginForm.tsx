@@ -49,7 +49,10 @@ export const LoginForm = ({ className, onSuccess, ...rest }: Props) => {
         <CardTitle>{t("auth.sign-in")}</CardTitle>
         <CardDescription>
           <span>{t("auth.don't-have-account")} </span>
-          <Link to="/auth/sign-up" className="link">
+          <Link
+            to="/auth/sign-up"
+            className="font-semibold text-primary transition-colors hover:text-primary/80 hover:underline"
+          >
             {t("auth.sign-up").toLowerCase()}
           </Link>
         </CardDescription>
@@ -71,6 +74,12 @@ export const LoginForm = ({ className, onSuccess, ...rest }: Props) => {
             placeholder="cool-password-2024"
             autoComplete="current-password"
           />
+          <Link
+            to={"/auth/restore-password"}
+            className="-mt-5 w-fit text-sm font-medium text-primary transition-colors hover:text-primary/80 hover:underline"
+          >
+            Forgot password?
+          </Link>
           <SubmitButton
             isLoading={loginStatus.isLoading}
             disabled={Object.values(form).some((v) => v.trim().length === 0)}

@@ -303,7 +303,7 @@ export const CheckoutPage = () => {
                 >
                   {p.title}
                 </Link>
-                <div className="flex items-end justify-between tracking-tight">
+                <div className="flex items-baseline justify-between tracking-tight">
                   <p className="text-sm text-muted-foreground">
                     {entities[p.id]?.count ?? 1} x {formatMoney(p.price)}
                   </p>
