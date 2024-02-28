@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Rating } from "@/components/Rating";
 import { useAuth } from "@/features/auth/useAuth";
 import { ReviewForm } from "./ReviewForm";
+import { useConfirmDialog } from "@/features/confirmDialog";
 
 type Props = React.HTMLAttributes<HTMLDivElement> & {
   review: Review;
@@ -31,14 +32,22 @@ export const ReviewCard: React.FC<Props> = ({
 }) => {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const [, setDialog] = useConfirmDialog();
   const [isEditing, setIsEditing] = useState(false);
 
   const [deleteReview] = useDeleteReviewMutation();
   const handleDelete = () => {
-    deleteReview({ productId: review.productId, reviewId: review.id })
-      .unwrap()
-      .then(onDelete)
-      .catch(() => onError?.());
+    setDialog({
+      open: true,
+      title: t("sure"),
+      description: t("product.reviews.delete-confirm"),
+      onSuccess: () =>
+        deleteReview({ productId: review.productId, reviewId: review.id })
+          .unwrap()
+          .then(onDelete)
+          .catch(() => onError?.()),
+      onCancel: null,
+    });
   };
 
   return (

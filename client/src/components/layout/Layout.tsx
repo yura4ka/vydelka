@@ -5,6 +5,7 @@ import { useAuth } from "@/features/auth/useAuth";
 import { Toaster } from "../ui/toaster";
 import { useEffect } from "react";
 import { CartModal } from "@/features/cart";
+import { ConfirmDialog } from "@/features/confirmDialog";
 
 export const Layout = () => {
   useAuth();
@@ -27,6 +28,7 @@ export const Layout = () => {
       <Toaster />
       <ScrollRestoration getKey={(location) => location.pathname} />
       <CartModal />
+      <ConfirmDialog />
     </div>
   );
 };

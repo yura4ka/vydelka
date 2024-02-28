@@ -23,6 +23,7 @@ import React, { useState } from "react";
 import {
   Product,
   ProductsResponse,
+  useDeleteProductMutation,
   useGetProductsQuery,
 } from "@/features/products/productsApiSlice";
 import { ProductForm } from "@/features/products/components/ProductForm";
@@ -36,6 +37,7 @@ import {
   formatStringDate,
 } from "@/lib/utils";
 import { Pagination } from "@/components/Pagination";
+import { useConfirmDialog } from "@/features/confirmDialog";
 
 type CategoriesTableProps = {
   categories: Category[] | undefined;
@@ -111,8 +113,9 @@ const ProductsTable: React.FC<ProductsTableProps> = ({
   filters,
   onError,
 }) => {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const lang = (i18n.resolvedLanguage ?? "en") as Language;
+  const [, setDialog] = useConfirmDialog();
 
   const [params] = useSearchParams();
   const page = Number(params.get("page")) || 1;
@@ -123,6 +126,22 @@ const ProductsTable: React.FC<ProductsTableProps> = ({
   }>(() => ({
     isOpen: false,
   }));
+
+  const [deleteProduct] = useDeleteProductMutation();
+
+  const handleDelete = (id: string) => {
+    setDialog({
+      open: true,
+      title: t("sure"),
+      description:
+        "This action will permanently delete this product. It cannot be undone",
+      onSuccess: () =>
+        deleteProduct(id)
+          .unwrap()
+          .catch(() => onError()),
+      onCancel: null,
+    });
+  };
 
   return (
     <>
@@ -186,7 +205,11 @@ const ProductsTable: React.FC<ProductsTableProps> = ({
                   <Pencil className="h-5 w-5 text-muted-foreground" />
                   <span className="sr-only">edit product</span>
                 </Button>
-                <Button variant="ghost" size="icon">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleDelete(p.id)}
+                >
                   <Trash2 className="h-5 w-5 text-destructive" />
                   <span className="sr-only">delete product</span>
                 </Button>

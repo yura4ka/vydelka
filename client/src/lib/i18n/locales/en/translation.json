@@ -2,6 +2,7 @@
   "success": "Success!",
   "cancel": "Cancel",
   "ok": "Ok",
+  "sure": "Are you absolutely sure?",
   "theme": {
     "light": "Light",
     "dark": "Dark",
@@ -104,7 +105,8 @@
       "verified": "From the customer",
       "edit": "Edit",
       "delete": "Delete",
-      "edit-review": "Edit this review"
+      "edit-review": "Edit this review",
+      "delete-confirm": "This action cannot be undone. It will permanently delete this review"
     }
   },
   "cart": {

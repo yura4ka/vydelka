@@ -25,6 +25,7 @@ import { Pencil } from "lucide-react";
 import { CustomInput } from "@/components/CustomInput";
 import { SubmitButton } from "@/components/SubmitButton";
 import { cn, isFetchQueryError } from "@/lib/utils";
+import { useConfirmDialog } from "@/features/confirmDialog";
 
 const initialForm = () => ({
   translations: createTranslation(),
@@ -48,8 +49,9 @@ export const CategoryFiltersForm: FC<Props> = ({
   categoryId,
   onError,
 }) => {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const lang = (i18n.resolvedLanguage ?? "en") as Language;
+  const [, setDialog] = useConfirmDialog();
 
   const [createFilter, createFilterStatus] = useCreateFilterMutation();
   const [createVariant, createVariantStatus] = useCreateFilterVariantMutation();
@@ -112,6 +114,17 @@ export const CategoryFiltersForm: FC<Props> = ({
   };
 
   const onDelete = async () => {
+    setDialog({
+      open: true,
+      title: t("sure"),
+      description:
+        "This action will permanently delete this item. It cannot be undone",
+      onSuccess: handleDelete,
+      onCancel: null,
+    });
+  };
+
+  const handleDelete = async () => {
     let request;
     if (currentFilter.type === "filter")
       request = deleteFilter({ categoryId, id: currentFilter.data!.id });

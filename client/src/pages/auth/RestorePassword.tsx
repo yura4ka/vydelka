@@ -2,15 +2,6 @@ import { ConfirmPassword } from "@/components/ConfirmPassword";
 import { CustomInput } from "@/components/CustomInput";
 import { OTP } from "@/components/OTP";
 import { SubmitButton } from "@/components/SubmitButton";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { useToast } from "@/components/ui/use-toast";
 import {
   RestorationCodeResponse,
@@ -20,6 +11,7 @@ import {
   useResetPasswordMutation,
 } from "@/features/auth/authApiSlice";
 import { useAuth } from "@/features/auth/useAuth";
+import { useConfirmDialog } from "@/features/confirmDialog";
 import {
   cn,
   createErrorToast,
@@ -37,6 +29,7 @@ export const RestorePassword = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { isLoading, isAuth } = useAuth();
+  const [, setDialog] = useConfirmDialog();
 
   const [requestCode, requestStatus] = useRequestCodeMutation();
   const [attemptsData, setAttemptsData] =
@@ -44,12 +37,6 @@ export const RestorePassword = () => {
   const [checkCode, checkStatus] = useCheckCodeMutation();
   const [resetPassword, resetStatus] = useResetPasswordMutation();
   const [login, loginStatus] = useLoginMutation();
-
-  const [dialog, setDialog] = useState(() => ({
-    open: false,
-    title: "",
-    description: "",
-  }));
 
   const [stage, setStage] = useState(0);
   const [email, setEmail] = useState("");
@@ -62,6 +49,7 @@ export const RestorePassword = () => {
       open: true,
       title: t("auth.error.attempts"),
       description: t("auth.error.attempts-description"),
+      onSuccess: () => navigate("/"),
     });
   };
 
@@ -74,6 +62,7 @@ export const RestorePassword = () => {
           open: true,
           title: t("auth.error.expired"),
           description: t("auth.error.expired-description"),
+          onSuccess: () => navigate("/"),
         });
       } else if (e.status === 400) {
         toast(createErrorToast(undefined, t("auth.error.wrong-code")));
@@ -270,24 +259,6 @@ export const RestorePassword = () => {
           </form>
         )}
       </div>
-      <AlertDialog
-        open={dialog.open}
-        onOpenChange={(open) => setDialog((prev) => ({ ...prev, open }))}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{dialog.title}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {dialog.description}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={() => navigate("/")}>
-              {t("ok")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </main>
   );
 };

@@ -1,8 +1,7 @@
-import {
-  configureStore,
-} from "@reduxjs/toolkit";
+import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "../features/auth/authSlice";
 import cartReducer, { cartListener } from "../features/cart/cartSlice";
+import confirmDialogReducer from "../features/confirmDialog/confirmDialogSlice";
 import { api } from "./api/apiSlice";
 
 export const store = configureStore({
@@ -10,6 +9,7 @@ export const store = configureStore({
     [api.reducerPath]: api.reducer,
     auth: authReducer,
     cart: cartReducer,
+    confirmDialog: confirmDialogReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ serializableCheck: false })
