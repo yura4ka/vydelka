@@ -1,12 +1,36 @@
+version: "3.4"
+
 services:
   db:
-    image: postgres
+    build:
+      context: .
+      dockerfile: pg.Dockerfile
     restart: always
-    env_file: /server/.env
+    env_file: .env
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+
+  server:
+    build:
+      context: ./server
+    links:
+      - db
+    restart: always
+    env_file: .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+  client:
+    build:
+      context: ./client
+    restart: always
+    env_file: .env
+    ports:
+      - "3000:3000"
 
 volumes:
   pgdata:

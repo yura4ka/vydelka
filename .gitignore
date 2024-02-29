@@ -24,6 +24,6 @@ client/*.local
 *.sw?
 
 .vscode
-*/.env
+**/.env
 /server/vydelka.*
 /server/vydelka

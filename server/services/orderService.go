@@ -238,7 +238,7 @@ func GetOrders(userId string, page int) ([]Order, error) {
 			SUM(p.price * c.quantity) AS total,
 			COUNT(c.*) AS items_count
 		FROM orders AS o
-		LEFT JOIN order_content AS c ON o.id = c.order_id
+		INNER JOIN order_content AS c ON o.id = c.order_id
 		LEFT JOIN products AS p ON c.product_id = p.id
 		WHERE o.user_id = $1
 		GROUP BY o.id

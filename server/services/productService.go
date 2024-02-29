@@ -563,7 +563,7 @@ func GetRecentProducts(location *string, lang Language) ([]Product, error) {
 			{{if not (eq . nil)}} AND o.region = $2 {{end}}
 			ORDER BY c.product_id, o.created_at DESC
 		) c
-		LEFT JOIN products AS p ON c.product_id = p.id
+		INNER JOIN products AS p ON c.product_id = p.id
 		LEFT JOIN product_translations AS pt ON p.id = pt.product_id AND lang = $1
 		LEFT JOIN product_images AS pi ON p.id = pi.product_id
 		LEFT JOIN LATERAL (

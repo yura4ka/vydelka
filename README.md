@@ -1,30 +1,38 @@
-# React + TypeScript + Vite
+# VYDELKA
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Online store
 
-Currently, two official plugins are available:
+Client:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- React + TypeScript
+- [Redux Toolkit + RTK Query](https://redux-toolkit.js.org/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Radix UI](https://www.radix-ui.com/primitives) + [shadcn/ui](https://ui.shadcn.com/)
+- [React Router](https://reactrouter.com/en/main)
+- [i18next](https://react.i18next.com/)
 
-## Expanding the ESLint configuration
+Server:
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+- Go
+- [Fiber](https://github.com/gofiber/fiber)
+- [pgx](https://github.com/jackc/pgx) + [scany](https://github.com/georgysavva/scany)
+- [goose (migrations)](https://github.com/pressly/goose)
+- [validator](https://github.com/go-playground/validator) + [mold](https://github.com/go-playground/mold)
 
-- Configure the top-level `parserOptions` property like this:
+Other:
 
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
+- [Stripe](https://stripe.com/)
+- [Uploadcare](https://uploadcare.com/)
+- [IPinfo](https://github.com/ipinfo/go)
+
+## How to install
+
+```
+git clone https://github.com/yura4ka/vydelka
 ```
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+Populate .env file from the .env.example
+
+```
+docker-compose up
+```

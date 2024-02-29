@@ -1,6 +1,7 @@
 package main
 
 import (
+	"embed"
 	"errors"
 	"log"
 	"os"
@@ -27,6 +28,9 @@ func init() {
 	}
 }
 
+//go:embed migrations/*.sql
+var embedMigrations embed.FS
+
 func main() {
 	app := fiber.New(fiber.Config{
 		ErrorHandler: func(c *fiber.Ctx, err error) error {
@@ -48,7 +52,7 @@ func main() {
 	app.Use(middleware.ParseLanguage)
 
 	stripe.Key = os.Getenv("STRIPE_SECRET")
-	db.Connect()
+	db.Connect(embedMigrations)
 	router.SetupRouter(app)
 	services.SetupValidator()
 

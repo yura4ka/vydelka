@@ -25,6 +25,26 @@ RETURNS tsvector AS $$
 $$ LANGUAGE sql IMMUTABLE;
 -- +goose StatementEnd
 
+CREATE TEXT SEARCH DICTIONARY ukrainian_huns (
+  TEMPLATE = ispell,
+  DictFile = uk_UA,
+  AffFile = uk_UA,
+  StopWords = ukrainian
+);
+
+CREATE TEXT SEARCH DICTIONARY ukrainian_stem (
+    template = simple,
+    stopwords = ukrainian
+);
+
+CREATE TEXT SEARCH CONFIGURATION ukrainian (PARSER=default);
+
+ALTER TEXT SEARCH CONFIGURATION ukrainian ALTER MAPPING FOR hword, hword_part, word WITH ukrainian_huns, ukrainian_stem;
+
+ALTER TEXT SEARCH CONFIGURATION ukrainian ALTER MAPPING FOR int, uint, numhword, numword, hword_numpart, email, float, file, url, url_path, version, host, sfloat WITH simple;
+
+ALTER TEXT SEARCH CONFIGURATION ukrainian ALTER MAPPING FOR asciihword, asciiword, hword_asciipart WITH english_stem;
+
 CREATE TABLE translation_items (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY
 );
@@ -166,6 +186,10 @@ DROP TYPE IF EXISTS language_type CASCADE;
 DROP TYPE IF EXISTS delivery_type CASCADE;
 DROP TYPE IF EXISTS pay_type CASCADE;
 DROP TYPE IF EXISTS order_status CASCADE;
+
+DROP TEXT SEARCH DICTIONARY IF EXISTS ukrainian_huns CASCADE;
+DROP TEXT SEARCH DICTIONARY IF EXISTS ukrainian_stem CASCADE;
+DROP TEXT SEARCH CONFIGURATION IF EXISTS ukrainian CASCADE;
 
 DROP FUNCTION IF EXISTS on_post_change CASCADE;
 DROP FUNCTION IF EXISTS generate_tsvector CASCADE;
