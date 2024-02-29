@@ -5,6 +5,7 @@ services:
     build:
       context: .
       dockerfile: pg.Dockerfile
+    image: yura4ka/vydelka-db
     restart: always
     env_file: .env
     ports:
@@ -15,6 +16,7 @@ services:
   server:
     build:
       context: ./server
+    image: yura4ka/vydelka-server
     links:
       - db
     restart: always
@@ -27,6 +29,7 @@ services:
   client:
     build:
       context: ./client
+    image: yura4ka/vydelka-client
     restart: always
     env_file: .env
     ports:

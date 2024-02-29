@@ -9,8 +9,8 @@ RUN apt-get install -y wget unzip \
   && rm -rf /var/lib/apt/lists/*
 
 RUN wget https://github.com/brown-uk/dict_uk/releases/download/v6.3.1/hunspell-uk_UA_6.3.1.zip \
-  && wget https://github.com/brown-uk/dict_uk/blob/be52697e0f3f1be7a6b4327069e30f8a7f68af9a/distr/postgresql/ukrainian.stop \
+  && wget https://raw.githubusercontent.com/brown-uk/dict_uk/master/distr/postgresql/ukrainian.stop \
   && unzip hunspell-uk_UA_6.3.1.zip \
-  && cp uk_UA.aff $(pg_config --sharedir)/tsearch_data/uk_UA.affix \
-  && cp uk_UA.dic $(pg_config --sharedir)/tsearch_data/uk_UA.dict \
+  && cp uk_UA.aff $(pg_config --sharedir)/tsearch_data/uk_ua.affix \
+  && cp uk_UA.dic $(pg_config --sharedir)/tsearch_data/uk_ua.dict \
   && cp ukrainian.stop $(pg_config --sharedir)/tsearch_data/ukrainian.stop

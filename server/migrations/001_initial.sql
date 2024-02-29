@@ -27,8 +27,8 @@ $$ LANGUAGE sql IMMUTABLE;
 
 CREATE TEXT SEARCH DICTIONARY ukrainian_huns (
   TEMPLATE = ispell,
-  DictFile = uk_UA,
-  AffFile = uk_UA,
+  DictFile = uk_ua,
+  AffFile = uk_ua,
   StopWords = ukrainian
 );
 
@@ -128,7 +128,7 @@ CREATE TABLE users (
   restoration_expires_at TIMESTAMPTZ,
   last_restoration_at TIMESTAMPTZ,
   last_restoration_attempt_at TIMESTAMPTZ,
-  restoration_attempts SMALLINT DEFAULT 0,
+  restoration_attempts SMALLINT DEFAULT 0
 );
 
 CREATE TABLE orders (
