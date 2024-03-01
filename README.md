@@ -31,7 +31,7 @@ Other:
 git clone https://github.com/yura4ka/vydelka
 ```
 
-Populate .env file from the [.env.example](./.env.example) and uncomment `env_file` line in the `docker-compose.yml`
+Populate .env file from the [.env.example](./.env.example)
 
 ```
 docker-compose up
