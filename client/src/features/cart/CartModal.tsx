@@ -35,7 +35,7 @@ export const CartModal = () => {
     <Dialog.Root open={cart.isOpen} onOpenChange={cart.setOpen}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-        <Dialog.Content className="fixed left-1/2 top-0 z-50 grid h-screen w-full max-w-2xl -translate-x-1/2 grid-rows-[auto_1fr_auto] border bg-card text-card-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 sm:my-8 sm:h-auto sm:max-h-[calc(100vh-4rem)] sm:rounded-lg">
+        <Dialog.Content className="fixed left-1/2 top-0 z-50 grid h-dvh w-full max-w-2xl -translate-x-1/2 grid-rows-[auto_1fr_auto] border bg-card text-card-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 sm:my-8 sm:h-auto sm:max-h-[calc(100vh-4rem)] sm:rounded-lg">
           <div className="flex items-center justify-between gap-4 border-b p-4">
             <Dialog.Title className="text-lg font-semibold leading-none tracking-tight">
               {t("navigation.cart")}
