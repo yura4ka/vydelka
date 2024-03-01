@@ -100,7 +100,7 @@ export const ReviewCard: React.FC<Props> = ({
           )}
           <div className="font-medium">{review.userName}</div>
           <Rating value={review.rating} readonly />
-          <p>{review.content}</p>
+          <p className="break-word whitespace-pre-line">{review.content}</p>
           <div className="pt-2 text-sm text-muted-foreground">
             <p>
               {`${t("product.reviews.created-at")} ${formatStringDate(review.createdAt)}`}
