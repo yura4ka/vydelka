@@ -1,7 +1,8 @@
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 import { Button } from "./ui/button";
 import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
 function createRange(start: number, end: number) {
   return new Array(end - start + 1)
@@ -9,14 +10,21 @@ function createRange(start: number, end: number) {
     .map((_, i) => ({ value: i + start, hidden: false }));
 }
 
-type Props = {
+type Props = React.HTMLAttributes<HTMLDivElement> & {
   totalPages: number;
   page: number;
   onChange?: (page: number) => void;
   hash?: string;
 };
 
-export const Pagination = ({ totalPages, page, onChange, hash }: Props) => {
+export const Pagination = ({
+  totalPages,
+  page,
+  onChange,
+  hash,
+  className,
+  ...rest
+}: Props) => {
   const [params] = useSearchParams();
 
   const range = useMemo(() => {
@@ -65,8 +73,11 @@ export const Pagination = ({ totalPages, page, onChange, hash }: Props) => {
   if (!range) return null;
 
   return (
-    <nav className="mx-auto flex w-full justify-center">
-      <ul className="flex items-center gap-1">
+    <nav
+      className={cn("flex w-full justify-center overflow-x-auto", className)}
+      {...rest}
+    >
+      <ul className="flex w-full min-w-[350px] items-center justify-between gap-1 xs:justify-center ">
         <li>
           <Button
             onClick={() => onChange?.(page - 1)}
@@ -77,7 +88,7 @@ export const Pagination = ({ totalPages, page, onChange, hash }: Props) => {
           >
             <Link
               to={generateLink(page - 1)}
-              className={page === 1 ? "pointer-events-none opacity-50" : ""}
+              className={cn(page === 1 && "pointer-events-none opacity-50")}
             >
               <ChevronLeft className="h-4 w-4" />
               <span className="sr-only">previous page</span>
@@ -116,9 +127,9 @@ export const Pagination = ({ totalPages, page, onChange, hash }: Props) => {
           >
             <Link
               to={generateLink(page + 1)}
-              className={
-                page === totalPages ? "pointer-events-none opacity-50" : ""
-              }
+              className={cn(
+                page === totalPages && "pointer-events-none opacity-50",
+              )}
             >
               <ChevronRight className="h-4 w-4" />
               <span className="sr-only">previous page</span>

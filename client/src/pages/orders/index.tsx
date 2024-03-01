@@ -118,7 +118,11 @@ export const OrdersPage = () => {
           {t("order.nothing")}
         </p>
       )}
-      <Pagination page={page} totalPages={data?.totalPages ?? 1} />
+      <Pagination
+        page={page}
+        totalPages={data?.totalPages ?? 1}
+        className="max-w-[calc(100vw-1rem)] pb-8"
+      />
     </main>
   );
 };

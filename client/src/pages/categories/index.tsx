@@ -294,7 +294,7 @@ const ProductSection: React.FC<ProductSectionProps> = ({
             <Loader2 className="fixed top-1/2 h-8 w-8 animate-spin" />
           </div>
         )}
-        <Pagination page={page} totalPages={data.totalPages} />
+        <Pagination page={page} totalPages={data.totalPages} className="pb-4" />
       </section>
     </div>
   );

@@ -218,7 +218,11 @@ const ProductsTable: React.FC<ProductsTableProps> = ({
           ))}
         </TableBody>
       </Table>
-      <Pagination page={page} totalPages={data?.totalPages ?? 1} />
+      <Pagination
+        page={page}
+        totalPages={data?.totalPages ?? 1}
+        className="max-w-[calc(100vw-1rem)] pb-8"
+      />
       <ProductForm
         key={productModal.product?.id ?? ""}
         isOpen={productModal.isOpen}
@@ -263,7 +267,7 @@ export const AdminCategories = () => {
   const isFinalCategory = !categories || categories.length === 0;
 
   return (
-    <main className="container space-y-10 pt-8">
+    <main className="container max-w-screen-2xl space-y-10 px-2 pt-8 sm:px-4">
       <div className="flex flex-wrap items-start justify-between gap-8">
         {id && (
           <CategoryForm

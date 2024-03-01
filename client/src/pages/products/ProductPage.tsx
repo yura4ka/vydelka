@@ -187,6 +187,7 @@ export const ProductPage = () => {
                 page={page}
                 totalPages={reviews?.totalPages ?? 1}
                 hash="reviews"
+                className="max-w-[calc(100vw-1rem)]"
               />
             </div>
           </section>
