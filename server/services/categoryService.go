@@ -526,20 +526,21 @@ func GetCategoryRoute(slug string, lang Language) ([]CategoryRoute, error) {
 	var result []CategoryRoute
 	err := pgxscan.Select(db.Ctx, db.Client, &result, `
 		WITH RECURSIVE category_tree AS (
-			SELECT id, title_translation_item, slug, parent_id
+			SELECT id, title_translation_item, slug, parent_id, 1 AS level
 			FROM categories
 			WHERE slug = $1
 
 			UNION ALL
 
-			SELECT c.id, c.title_translation_item, c.slug, c.parent_id
+			SELECT c.id, c.title_translation_item, c.slug, c.parent_id, ct.level+1
 			FROM categories AS c
 			JOIN category_tree AS ct ON c.id = ct.parent_id
 		)
 		SELECT t.content AS title, c.slug
 		FROM category_tree AS c
 		LEFT JOIN translation_items AS ti ON c.title_translation_item = ti.id
-		LEFT JOIN translations AS t ON ti.id = t.item_id AND lang = $2;
+		LEFT JOIN translations AS t ON ti.id = t.item_id AND lang = $2
+		ORDER BY c.level DESC;
 	`, slug, lang)
 	return result, err
 }

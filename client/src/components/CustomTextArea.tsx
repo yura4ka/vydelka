@@ -32,6 +32,12 @@ export const CustomTextArea: React.FC<Props> = ({
           resizeTextArea(e.target);
           onChange?.(e);
         }}
+        onFocus={(e) =>
+          resizeTextArea(e.target, e.target.value.trim().length === 0)
+        }
+        onBlur={(e) =>
+          resizeTextArea(e.target, e.target.value.trim().length === 0)
+        }
       />
     </div>
   );
