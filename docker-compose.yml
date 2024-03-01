@@ -7,7 +7,9 @@ services:
       dockerfile: pg.Dockerfile
     image: yura4ka/vydelka-db
     restart: always
-    env_file: .env
+    env_file:
+      - path: ".env"
+        required: false
     ports:
       - "5432:5432"
     volumes:
@@ -20,7 +22,9 @@ services:
     links:
       - db
     restart: always
-    env_file: .env
+    env_file:
+      - path: ".env"
+        required: false
     ports:
       - "8000:8000"
     depends_on:
@@ -31,7 +35,9 @@ services:
       context: ./client
     image: yura4ka/vydelka-client
     restart: always
-    env_file: .env
+    env_file:
+      - path: ".env"
+        required: false
     ports:
       - "3000:3000"
 
